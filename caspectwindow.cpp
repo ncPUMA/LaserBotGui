@@ -8,9 +8,63 @@ class CAspectWindowPrivate
 {
     friend class CAspectWindow;
 
+    enum EN_ResizedSideFlags
+    {
+        ENRSF_NO     = 0x00,
+        ENRSF_LEFT   = 0x01,
+        ENRSF_RIGHT  = 0x02,
+        ENRSF_TOP    = 0x04,
+        ENRSF_BOTTOM = 0x08,
+
+        ENRSF_TOP_LEFT     = ENRSF_LEFT  + ENRSF_TOP,
+        ENRSF_TOP_RIGHT    = ENRSF_RIGHT + ENRSF_TOP,
+        ENRSF_BOTTOM_LEFT  = ENRSF_LEFT  + ENRSF_BOTTOM,
+        ENRSF_BOTTOM_RIGHT = ENRSF_RIGHT + ENRSF_BOTTOM
+    };
+    typedef int TResizedSideFlag;
+
     CAspectWindowPrivate(QWidget &view) :
         wdgt(&view),
         oldGeometry(view.rect()) { }
+
+    inline static TResizedSideFlag dedicateSide(const QRect &oldGeom,
+                                                const QRect &newGeom) {
+        TResizedSideFlag result = ENRSF_NO;
+        if (std::abs(newGeom.left() - oldGeom.left()) > RESIZE_PRECISION)
+            result += ENRSF_LEFT;
+        if (std::abs(newGeom.right() - oldGeom.right()) > RESIZE_PRECISION)
+            result += ENRSF_RIGHT;
+        if (std::abs(newGeom.top() - oldGeom.top()) > RESIZE_PRECISION)
+            result += ENRSF_TOP;
+        if (std::abs(newGeom.bottom() - oldGeom.bottom()) > RESIZE_PRECISION)
+            result += ENRSF_BOTTOM;
+        return result;
+    }
+
+    Aspect_TypeOfResize updateGeometry() {
+        const std::map <TResizedSideFlag, Aspect_TypeOfResize> mapResizeTypes = {
+            { ENRSF_NO          , Aspect_TOR_NO_BORDER               },
+            { ENRSF_LEFT        , Aspect_TOR_LEFT_BORDER             },
+            { ENRSF_RIGHT       , Aspect_TOR_RIGHT_BORDER            },
+            { ENRSF_TOP         , Aspect_TOR_TOP_BORDER              },
+            { ENRSF_BOTTOM      , Aspect_TOR_BOTTOM_BORDER           },
+            { ENRSF_TOP_LEFT    , Aspect_TOR_LEFT_AND_TOP_BORDER     },
+            { ENRSF_TOP_RIGHT   , Aspect_TOR_TOP_AND_RIGHT_BORDER    },
+            { ENRSF_BOTTOM_LEFT , Aspect_TOR_BOTTOM_AND_LEFT_BORDER  },
+            { ENRSF_BOTTOM_RIGHT, Aspect_TOR_RIGHT_AND_BOTTOM_BORDER }
+        };
+
+        Aspect_TypeOfResize result = Aspect_TOR_UNKNOWN;
+        if (!wdgt->isMinimized()) {
+            const QRect newGeometry = wdgt->geometry();
+            const TResizedSideFlag side = dedicateSide(oldGeometry, newGeometry);
+            auto it = mapResizeTypes.find(side);
+            if (it != mapResizeTypes.cend())
+                result = it->second;
+            oldGeometry = newGeometry;
+        }
+        return result;
+    }
 
     QWidget * const wdgt;
     QRect oldGeometry;
@@ -46,53 +100,7 @@ Aspect_Drawable CAspectWindow::NativeParentHandle() const
 
 Aspect_TypeOfResize CAspectWindow::DoResize()
 {
-    Aspect_TypeOfResize result = Aspect_TOR_UNKNOWN;
-    if (!d_ptr->wdgt->isMinimized())
-    {
-        enum EN_ResizedSideFlags
-        {
-            ENRSF_NO     = 0x00,
-            ENRSF_LEFT   = 0x01,
-            ENRSF_RIGHT  = 0x02,
-            ENRSF_TOP    = 0x04,
-            ENRSF_BOTTOM = 0x08,
-
-            ENRSF_TOP_LEFT     = ENRSF_LEFT  + ENRSF_TOP,
-            ENRSF_TOP_RIGHT    = ENRSF_RIGHT + ENRSF_TOP,
-            ENRSF_BOTTOM_LEFT  = ENRSF_LEFT  + ENRSF_BOTTOM,
-            ENRSF_BOTTOM_RIGHT = ENRSF_RIGHT + ENRSF_BOTTOM
-        };
-        typedef int TResizedSideFlag;
-
-        TResizedSideFlag sideFlag = ENRSF_NO;
-        const QRect newGeometry = d_ptr->wdgt->geometry();
-        if (std::abs(newGeometry.left() - d_ptr->oldGeometry.left()) > RESIZE_PRECISION)
-            sideFlag += ENRSF_LEFT;
-        if (std::abs(newGeometry.right() - d_ptr->oldGeometry.right()) > RESIZE_PRECISION)
-            sideFlag += ENRSF_RIGHT;
-        if (std::abs(newGeometry.top() - d_ptr->oldGeometry.top()) > RESIZE_PRECISION)
-            sideFlag += ENRSF_TOP;
-        if (std::abs(newGeometry.bottom() - d_ptr->oldGeometry.bottom()) > RESIZE_PRECISION)
-            sideFlag += ENRSF_BOTTOM;
-
-        d_ptr->oldGeometry = newGeometry;
-
-        const std::map <TResizedSideFlag, Aspect_TypeOfResize> mapResizeTypes = {
-            { ENRSF_NO          , Aspect_TOR_NO_BORDER               },
-            { ENRSF_LEFT        , Aspect_TOR_LEFT_BORDER             },
-            { ENRSF_RIGHT       , Aspect_TOR_RIGHT_BORDER            },
-            { ENRSF_TOP         , Aspect_TOR_TOP_BORDER              },
-            { ENRSF_BOTTOM      , Aspect_TOR_BOTTOM_BORDER           },
-            { ENRSF_TOP_LEFT    , Aspect_TOR_LEFT_AND_TOP_BORDER     },
-            { ENRSF_TOP_RIGHT   , Aspect_TOR_TOP_AND_RIGHT_BORDER    },
-            { ENRSF_BOTTOM_LEFT , Aspect_TOR_BOTTOM_AND_LEFT_BORDER  },
-            { ENRSF_BOTTOM_RIGHT, Aspect_TOR_RIGHT_AND_BOTTOM_BORDER }
-        };
-        auto it = mapResizeTypes.find(sideFlag);
-        if (it != mapResizeTypes.cend())
-            result = it->second;
-    }
-    return result;
+    return d_ptr->updateGeometry();
 }
 
 Standard_Boolean CAspectWindow::IsMapped() const
