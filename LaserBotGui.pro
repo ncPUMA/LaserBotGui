@@ -10,11 +10,13 @@ CONFIG += c++11
 
 SOURCES += \
     caspectwindow.cpp \
+    cmainviewport.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     caspectwindow.h \
+    cmainviewport.h \
     mainwindow.h
 
 FORMS += \
