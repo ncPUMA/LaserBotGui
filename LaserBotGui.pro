@@ -9,12 +9,20 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ModelLoader/cabstractmodelloader.cpp \
+    ModelLoader/cbreploader.cpp \
+    ModelLoader/cmodelloaderfactorymethod.cpp \
+    ModelLoader/csteploader.cpp \
     caspectwindow.cpp \
     cmainviewport.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
+    ModelLoader/cabstractmodelloader.h \
+    ModelLoader/cbreploader.h \
+    ModelLoader/cmodelloaderfactorymethod.h \
+    ModelLoader/csteploader.h \
     caspectwindow.h \
     cmainviewport.h \
     mainwindow.h

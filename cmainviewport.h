@@ -15,6 +15,8 @@ public:
 
     void init(AIS_InteractiveContext &context);
 
+    void fitInView();
+
 protected:
     QPaintEngine* paintEngine() const final;
     void paintEvent(QPaintEvent *) final;

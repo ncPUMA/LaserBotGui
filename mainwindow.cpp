@@ -1,22 +1,23 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <QDebug>
+#include <QFileDialog>
+#include <QMessageBox>
+
 #include <OpenGl_GraphicDriver.hxx>
 #include <V3d_Viewer.hxx>
 #include <AIS_InteractiveContext.hxx>
 
+#include <AIS_Shape.hxx>
+
+#include "ModelLoader/cmodelloaderfactorymethod.h"
+#include "ModelLoader/cabstractmodelloader.h"
+
 class MainWindowPrivate
 {
 public:
-    MainWindowPrivate() :
-        viewer(nullptr),
-        context(nullptr)
-    { }
-
-    ~MainWindowPrivate() {
-        delete viewer;
-        delete context;
-    }
+    MainWindowPrivate() { }
 
     void init(OpenGl_GraphicDriver &driver) {
         viewer = new V3d_Viewer(&driver);
@@ -30,9 +31,13 @@ public:
         context = new AIS_InteractiveContext(viewer);
     }
 
-    V3d_Viewer             *viewer;
-    AIS_InteractiveContext *context;
+    Handle(V3d_Viewer)             viewer;
+    Handle(AIS_InteractiveContext) context;
+
+    NCollection_Vector <Handle(AIS_InteractiveObject)> curModels;
 };
+
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -40,6 +45,10 @@ MainWindow::MainWindow(QWidget *parent) :
     d_ptr(new MainWindowPrivate())
 {
     ui->setupUi(this);
+
+    //Menu "File"
+    connect(ui->actionImport, SIGNAL(triggered(bool)), SLOT(slImport()));
+    connect(ui->actionExit, SIGNAL(triggered(bool)), SLOT(slExit()));
 }
 
 MainWindow::~MainWindow()
@@ -52,5 +61,42 @@ void MainWindow::init(OpenGl_GraphicDriver &driver)
 {
     d_ptr->init(driver);
     ui->mainView->init(*d_ptr->context);
+}
+
+void MainWindow::slImport()
+{
+    CModelLoaderFactoryMethod factory;
+    QString selectedFilter;
+    const QString fName =
+            QFileDialog::getOpenFileName(this,
+                                         tr("Выбор файла"),
+                                         QString(),
+                                         factory.supportedFilters(),
+                                         &selectedFilter);
+    if (!fName.isNull())
+    {
+        d_ptr->context->RemoveAll(Standard_False);
+        CAbstractModelLoader &loader = factory.loader(selectedFilter);
+        d_ptr->curModels = loader.load(fName);
+        if (d_ptr->curModels.IsEmpty())
+        {
+            QMessageBox::critical(this,
+                                  tr("Ошибка загрузки файла"),
+                                  tr("Ошибка загрузки файла"));
+        }
+        else
+        {
+            for(NCollection_Vector <Handle(AIS_InteractiveObject)>::Iterator it(d_ptr->curModels);
+                it.More(); it.Next())
+                d_ptr->context->Display(it.Value(), Standard_True);
+        }
+        d_ptr->viewer->Redraw();
+        ui->mainView->fitInView();
+    }
+}
+
+void MainWindow::slExit()
+{
+    close();
 }
 

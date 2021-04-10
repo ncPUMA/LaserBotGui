@@ -46,6 +46,12 @@ class CMainViewportPrivate : public AIS_ViewController
         v3dView->MustBeResized();
     }
 
+    void fitInView() {
+        v3dView->FitAll();
+        v3dView->ZFitAll();
+        v3dView->Redraw();
+    }
+
     CMainViewport * const q_ptr;
     Handle(AIS_InteractiveContext) context;
     Handle(V3d_View)               v3dView;
@@ -73,6 +79,11 @@ CMainViewport::~CMainViewport()
 void CMainViewport::init(AIS_InteractiveContext &context)
 {
     d_ptr->init(context);
+}
+
+void CMainViewport::fitInView()
+{
+    d_ptr->fitInView();
 }
 
 QPaintEngine *CMainViewport::paintEngine() const

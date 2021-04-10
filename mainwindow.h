@@ -20,6 +20,10 @@ public:
 
     void init(OpenGl_GraphicDriver &driver);
 
+private slots:
+    void slImport();
+    void slExit();
+
 private:
     Ui::MainWindow *ui;
     MainWindowPrivate * const d_ptr;
