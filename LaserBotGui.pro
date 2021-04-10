@@ -11,6 +11,7 @@ CONFIG += c++11
 SOURCES += \
     ModelLoader/cabstractmodelloader.cpp \
     ModelLoader/cbreploader.cpp \
+    ModelLoader/cigesloader.cpp \
     ModelLoader/cmodelloaderfactorymethod.cpp \
     ModelLoader/csteploader.cpp \
     caspectwindow.cpp \
@@ -21,6 +22,7 @@ SOURCES += \
 HEADERS += \
     ModelLoader/cabstractmodelloader.h \
     ModelLoader/cbreploader.h \
+    ModelLoader/cigesloader.h \
     ModelLoader/cmodelloaderfactorymethod.h \
     ModelLoader/csteploader.h \
     caspectwindow.h \

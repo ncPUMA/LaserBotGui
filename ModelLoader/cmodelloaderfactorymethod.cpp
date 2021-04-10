@@ -1,11 +1,12 @@
 #include "cmodelloaderfactorymethod.h"
 
-#include <map>
+#include <vector>
 
 #include <QStringList>
 
 #include "cbreploader.h"
 #include "csteploader.h"
+#include "cigesloader.h"
 
 class CEmptyModelLoader : public CAbstractModelLoader
 {
@@ -25,24 +26,32 @@ class CModelLoaderFactoryMethodPrivate
     friend class CModelLoaderFactoryMethod;
 
     CModelLoaderFactoryMethodPrivate() {
-        mapLoaders["BREP (*.brep)"] = new CBrepLoader();
-        mapLoaders["STEP (*.step)"] = new CStepLoader();
+        appendLoader("STEP (*.step)", new CStepLoader());
+        appendLoader("BREP (*.brep)", new CBrepLoader());
+        appendLoader("IGES (*.iges)", new CIgesLoader());
     }
 
     ~CModelLoaderFactoryMethodPrivate() {
-        for(auto pair : mapLoaders)
+        for(auto pair : loaders)
             delete pair.second;
     }
 
     CAbstractModelLoader& loader(const QString &filter) {
         CAbstractModelLoader * result = &emptyLoader;
-        auto it = mapLoaders.find(filter);
-        if (it != mapLoaders.cend())
-            result = it->second;
+        for(auto pair : loaders) {
+            if (pair.first == filter) {
+                result = pair.second;
+                break;
+            }
+        }
         return *result;
     }
 
-    std::map <QString, CAbstractModelLoader *> mapLoaders;
+    void appendLoader(const char *format, CAbstractModelLoader * const loader) {
+        loaders.push_back(std::make_pair(QString(format), loader));
+    }
+
+    std::vector <std::pair <QString, CAbstractModelLoader *> > loaders;
     CEmptyModelLoader emptyLoader;
 };
 
@@ -62,7 +71,7 @@ CModelLoaderFactoryMethod::~CModelLoaderFactoryMethod()
 QString CModelLoaderFactoryMethod::supportedFilters() const
 {
     QStringList ls;
-    for(auto pair : d_ptr->mapLoaders)
+    for(auto pair : d_ptr->loaders)
         ls << pair.first;
     return ls.join(";;");
 }
