@@ -16,6 +16,8 @@
 
 class MainWindowPrivate
 {
+    friend class MainWindow;
+
 public:
     MainWindowPrivate() { }
 
@@ -29,6 +31,26 @@ public:
         viewer->SetLightOn();
 
         context = new AIS_InteractiveContext(viewer);
+    }
+
+    bool load(const QString &fName, CAbstractModelLoader &loader) {
+        context->RemoveAll(Standard_False);
+        curModels = loader.load(fName);
+        const bool result = !curModels.IsEmpty();
+        if (result)
+        {
+            for(NCollection_Vector <Handle(AIS_InteractiveObject)>::Iterator it(curModels);
+                it.More(); it.Next())
+            {
+                const Handle(AIS_InteractiveObject)& obj = it.Value();
+                context->Display(obj, Standard_True);
+                context->SetDisplayMode(obj, 1, false);
+            }
+            context->Deactivate();
+            context->Activate(AIS_Shape::SelectionMode(TopAbs_FACE));
+        }
+        viewer->Redraw();
+        return result;
     }
 
     Handle(V3d_Viewer)             viewer;
@@ -75,23 +97,13 @@ void MainWindow::slImport()
                                          &selectedFilter);
     if (!fName.isNull())
     {
-        d_ptr->context->RemoveAll(Standard_False);
         CAbstractModelLoader &loader = factory.loader(selectedFilter);
-        d_ptr->curModels = loader.load(fName);
-        if (d_ptr->curModels.IsEmpty())
-        {
+        if (d_ptr->load(fName, loader))
+            ui->mainView->fitInView();
+        else
             QMessageBox::critical(this,
                                   tr("Ошибка загрузки файла"),
                                   tr("Ошибка загрузки файла"));
-        }
-        else
-        {
-            for(NCollection_Vector <Handle(AIS_InteractiveObject)>::Iterator it(d_ptr->curModels);
-                it.More(); it.Next())
-                d_ptr->context->Display(it.Value(), Standard_True);
-        }
-        d_ptr->viewer->Redraw();
-        ui->mainView->fitInView();
     }
 }
 

@@ -1,5 +1,7 @@
 #include "cmainviewport.h"
 
+#include <QMouseEvent>
+
 #include <AIS_ViewController.hxx>
 
 #include <V3d_Viewer.hxx>
@@ -29,6 +31,10 @@ class CMainViewportPrivate : public AIS_ViewController
         {
           aspect->Map();
         }
+
+        myMouseGestureMap.Clear();
+        myMouseGestureMap.Bind(Aspect_VKeyMouse_LeftButton, AIS_MouseGesture_Pan);
+        myMouseGestureMap.Bind(Aspect_VKeyMouse_RightButton, AIS_MouseGesture_RotateOrbit);
 
         v3dView->MustBeResized();
 
@@ -99,4 +105,77 @@ void CMainViewport::paintEvent(QPaintEvent *)
 void CMainViewport::resizeEvent(QResizeEvent *)
 {
     d_ptr->resizeEvent();
+}
+
+//! Map Qt buttons bitmask to virtual keys.
+inline static Aspect_VKeyMouse qtMouseButtons2VKeys(Qt::MouseButtons theButtons)
+{
+    Aspect_VKeyMouse aButtons = Aspect_VKeyMouse_NONE;
+    if ((theButtons & Qt::LeftButton) != 0)
+    {
+        aButtons |= Aspect_VKeyMouse_LeftButton;
+    }
+    if ((theButtons & Qt::MiddleButton) != 0)
+    {
+        aButtons |= Aspect_VKeyMouse_MiddleButton;
+    }
+    if ((theButtons & Qt::RightButton) != 0)
+    {
+        aButtons |= Aspect_VKeyMouse_RightButton;
+    }
+    return aButtons;
+}
+
+//! Map Qt mouse modifiers bitmask to virtual keys.
+inline static Aspect_VKeyFlags qtMouseModifiers2VKeys(Qt::KeyboardModifiers theModifiers)
+{
+    Aspect_VKeyFlags aFlags = Aspect_VKeyFlags_NONE;
+    if ((theModifiers & Qt::ShiftModifier) != 0)
+    {
+        aFlags |= Aspect_VKeyFlags_SHIFT;
+    }
+    if ((theModifiers & Qt::ControlModifier) != 0)
+    {
+        aFlags |= Aspect_VKeyFlags_CTRL;
+    }
+    if ((theModifiers & Qt::AltModifier) != 0)
+    {
+        aFlags |= Aspect_VKeyFlags_ALT;
+    }
+    return aFlags;
+}
+
+void CMainViewport::mousePressEvent(QMouseEvent *event)
+{
+    const Graphic3d_Vec2i aPnt(event->pos().x(), event->pos().y());
+    const Aspect_VKeyFlags aFlags = qtMouseModifiers2VKeys(event->modifiers());
+    if (d_ptr->UpdateMouseButtons(aPnt, qtMouseButtons2VKeys(event->buttons()), aFlags, false))
+        update();
+}
+
+void CMainViewport::mouseReleaseEvent(QMouseEvent *event)
+{
+    const Graphic3d_Vec2i aPnt(event->pos().x(), event->pos().y());
+    const Aspect_VKeyFlags aFlags = qtMouseModifiers2VKeys(event->modifiers());
+    if (d_ptr->UpdateMouseButtons(aPnt, qtMouseButtons2VKeys(event->buttons()), aFlags, false))
+        update();
+}
+
+void CMainViewport::mouseMoveEvent(QMouseEvent *event)
+{
+    const Graphic3d_Vec2i aNewPos(event->pos().x(), event->pos().y());
+    if (d_ptr->UpdateMousePosition(aNewPos,
+                                   qtMouseButtons2VKeys(event->buttons()),
+                                   qtMouseModifiers2VKeys(event->modifiers()),
+                                   false))
+    {
+        update();
+    }
+}
+
+void CMainViewport::wheelEvent(QWheelEvent *event)
+{
+    const Graphic3d_Vec2i aPos(event->pos().x(), event->pos().y());
+    if (d_ptr->UpdateZoom(Aspect_ScrollDelta(aPos, event->delta() / 8)))
+        update();
 }
