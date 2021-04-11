@@ -21,8 +21,16 @@ public:
     void init(OpenGl_GraphicDriver &driver);
 
 private slots:
+    //File menu slots
     void slImport();
     void slExit();
+
+    //Menu Calibration
+    void slCalibAppend();
+    void slCalibReset();
+
+    //viewport
+    void slViewportMouseReleased();
 
 private:
     Ui::MainWindow *ui;

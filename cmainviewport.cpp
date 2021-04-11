@@ -1,5 +1,6 @@
 #include "cmainviewport.h"
 
+#include <QDebug>
 #include <QMouseEvent>
 
 #include <AIS_ViewController.hxx>
@@ -7,6 +8,8 @@
 #include <V3d_Viewer.hxx>
 #include <AIS_InteractiveContext.hxx>
 #include <V3d_View.hxx>
+
+#include <TopoDS_Shape.hxx>
 
 #include "caspectwindow.h"
 
@@ -59,6 +62,7 @@ class CMainViewportPrivate : public AIS_ViewController
     }
 
     CMainViewport * const q_ptr;
+
     Handle(AIS_InteractiveContext) context;
     Handle(V3d_View)               v3dView;
     Handle(CAspectWindow)          aspect;
@@ -159,6 +163,9 @@ void CMainViewport::mouseReleaseEvent(QMouseEvent *event)
     const Aspect_VKeyFlags aFlags = qtMouseModifiers2VKeys(event->modifiers());
     if (d_ptr->UpdateMouseButtons(aPnt, qtMouseButtons2VKeys(event->buttons()), aFlags, false))
         update();
+
+    if (event->button() == Qt::LeftButton)
+        emit sigMouseReleased();
 }
 
 void CMainViewport::mouseMoveEvent(QMouseEvent *event)

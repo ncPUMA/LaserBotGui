@@ -29,7 +29,7 @@
      <height>24</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu">
+   <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>Файл</string>
     </property>
@@ -38,7 +38,28 @@
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
+   <widget class="QMenu" name="menuCalibration">
+    <property name="title">
+     <string>Калибровка</string>
+    </property>
+    <addaction name="actionCalibApend"/>
+    <addaction name="actionCalibReset"/>
+   </widget>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>Вид</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>Справка</string>
+    </property>
+    <addaction name="action"/>
+   </widget>
+   <addaction name="menuFile"/>
    <addaction name="menu"/>
+   <addaction name="menuCalibration"/>
+   <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -60,6 +81,21 @@
   <action name="actionExit">
    <property name="text">
     <string>Выход</string>
+   </property>
+  </action>
+  <action name="actionCalibApend">
+   <property name="text">
+    <string>Добавить точку</string>
+   </property>
+  </action>
+  <action name="actionCalibReset">
+   <property name="text">
+    <string>Сброс</string>
+   </property>
+  </action>
+  <action name="action">
+   <property name="text">
+    <string>О Программе</string>
    </property>
   </action>
  </widget>

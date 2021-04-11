@@ -17,6 +17,9 @@ public:
 
     void fitInView();
 
+signals:
+    void sigMouseReleased();
+
 protected:
     QPaintEngine* paintEngine() const final;
     void paintEvent(QPaintEvent *) final;
