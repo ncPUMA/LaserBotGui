@@ -7,6 +7,7 @@
 #include "cbreploader.h"
 #include "csteploader.h"
 #include "cigesloader.h"
+#include "cstlloader.h"
 
 class CEmptyModelLoader : public CAbstractModelLoader
 {
@@ -29,6 +30,7 @@ class CModelLoaderFactoryMethodPrivate
         appendLoader("STEP (*.step)", new CStepLoader());
         appendLoader("BREP (*.brep)", new CBrepLoader());
         appendLoader("IGES (*.iges)", new CIgesLoader());
+        appendLoader("STL (*.stl)"  , new CStlLoader());
     }
 
     ~CModelLoaderFactoryMethodPrivate() {

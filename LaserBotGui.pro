@@ -15,6 +15,7 @@ SOURCES += \
     ModelLoader/cigesloader.cpp \
     ModelLoader/cmodelloaderfactorymethod.cpp \
     ModelLoader/csteploader.cpp \
+    ModelLoader/cstlloader.cpp \
     caspectwindow.cpp \
     cmainviewport.cpp \
     main.cpp \
@@ -27,6 +28,7 @@ HEADERS += \
     ModelLoader/cigesloader.h \
     ModelLoader/cmodelloaderfactorymethod.h \
     ModelLoader/csteploader.h \
+    ModelLoader/cstlloader.h \
     caspectwindow.h \
     cmainviewport.h \
     mainwindow.h
