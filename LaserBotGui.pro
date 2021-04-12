@@ -14,6 +14,7 @@ SOURCES += \
     ModelLoader/cbreploader.cpp \
     ModelLoader/cigesloader.cpp \
     ModelLoader/cmodelloaderfactorymethod.cpp \
+    ModelLoader/cobjloader.cpp \
     ModelLoader/csteploader.cpp \
     ModelLoader/cstlloader.cpp \
     caspectwindow.cpp \
@@ -27,6 +28,7 @@ HEADERS += \
     ModelLoader/cbreploader.h \
     ModelLoader/cigesloader.h \
     ModelLoader/cmodelloaderfactorymethod.h \
+    ModelLoader/cobjloader.h \
     ModelLoader/csteploader.h \
     ModelLoader/cstlloader.h \
     caspectwindow.h \
@@ -44,7 +46,7 @@ LIBS += -lTKernel -lTKMath -lTKService -lTKV3d -lTKOpenGl \
         -lTKSTEPBase -lTKGeomBase -lTKGeomAlgo -lTKG3d -lTKG2d \
         -lTKXSBase -lTKShHealing -lTKHLR -lTKTopAlgo -lTKMesh -lTKPrim \
         -lTKCDF -lTKBool -lTKBO -lTKFillet -lTKOffset -lTKLCAF -lTKCAF -lTKVCAF \
-                -lTKBin -lTKXml
+                -lTKBin -lTKXml -lTKRWMesh
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
