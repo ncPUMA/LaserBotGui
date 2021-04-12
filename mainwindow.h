@@ -21,11 +21,14 @@ public:
     void init(OpenGl_GraphicDriver &driver);
 
 private slots:
-    //File menu slots
+    //Menu "File"
     void slImport();
     void slExit();
 
-    //Menu Calibration
+    //Menu "View"
+    void slShading(bool enabled);
+
+    //Menu "Calibration"
     void slCalibAppend();
     void slCalibReset();
 

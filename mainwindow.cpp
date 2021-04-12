@@ -58,24 +58,39 @@ private:
         viewer->SetZLayerSettings(zLayerId, settings);
     }
 
-    bool load(const QString &fName, CAbstractModelLoader &loader) {
+    void reDrawScene(const bool shading) {
         context->RemoveAll(Standard_False);
-        curModels = loader.load(fName);
-        const bool result = !curModels.IsEmpty();
-        if (result)
-        {
-            for(NCollection_Vector <Handle(AIS_InteractiveObject)>::Iterator it(curModels);
-                it.More(); it.Next())
-            {
-                const Handle(AIS_InteractiveObject)& obj = it.Value();
-                context->Display(obj, Standard_True);
-                context->SetDisplayMode(obj, 1, false);
-            }
-            context->Deactivate();
-            context->Activate(AIS_Shape::SelectionMode(TopAbs_FACE));
+        for(NCollection_Vector <Handle(AIS_InteractiveObject)>::Iterator it(curModels);
+            it.More(); it.Next()) {
+            const Handle(AIS_InteractiveObject)& obj = it.Value();
+            context->Display(obj, Standard_True);
+            context->SetDisplayMode(obj, shading ? 1 : 0, false);
         }
+
+        for(NCollection_Vector <Handle(AIS_InteractiveObject)>::Iterator it(vertices);
+            it.More(); it.Next()) {
+            const Handle(AIS_InteractiveObject)& obj = it.Value();
+            context->Display(obj, Standard_False);
+            context->SetZLayer(obj, zLayerId);
+        }
+        for(NCollection_Vector <Handle(AIS_InteractiveObject)>::Iterator it(labels);
+            it.More(); it.Next()) {
+            const Handle(AIS_InteractiveObject)& obj = it.Value();
+            context->Display(obj, Standard_False);
+            context->SetZLayer(obj, zLayerId);
+        }
+
+        context->Deactivate();
+        context->Activate(AIS_Shape::SelectionMode(TopAbs_FACE));
         viewer->Redraw();
-        return result;
+    }
+
+    bool load(const QString &fName, CAbstractModelLoader &loader, const bool shading) {
+        curModels = loader.load(fName);
+        vertices.Clear();
+        labels.Clear();
+        reDrawScene(shading);
+        return !curModels.IsEmpty();
     }
 
     void startAppendCalibPoint() {
@@ -86,22 +101,6 @@ private:
             viewer->Redraw();
             usrAction = ENUA_ADD_CALIB_POINT;
         }
-    }
-
-    void resetCalibration() {
-        context->RemoveAll(Standard_False);
-        vertices.Clear();
-        labels.Clear();
-        for(NCollection_Vector <Handle(AIS_InteractiveObject)>::Iterator it(curModels);
-            it.More(); it.Next())
-        {
-            const Handle(AIS_InteractiveObject)& obj = it.Value();
-            context->Display(obj, Standard_True);
-            context->SetDisplayMode(obj, 1, false);
-        }
-        context->Deactivate();
-        context->Activate(AIS_Shape::SelectionMode(TopAbs_FACE));
-        viewer->Redraw();
     }
 
     void mouseReleased(MainWindow * const qptr) {
@@ -177,6 +176,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionImport, SIGNAL(triggered(bool)), SLOT(slImport()));
     connect(ui->actionExit, SIGNAL(triggered(bool)), SLOT(slExit()));
 
+    //Menu "View"
+    ui->actionShading->setCheckable(true);
+    ui->actionShading->setChecked(true);
+    connect(ui->actionShading, SIGNAL(toggled(bool)), SLOT(slShading(bool)));
+
     //Menu "Calibration"
     connect(ui->actionCalibApend, SIGNAL(triggered(bool)), SLOT(slCalibAppend()));
     connect(ui->actionCalibReset, SIGNAL(triggered(bool)), SLOT(slCalibReset()));
@@ -209,7 +213,7 @@ void MainWindow::slImport()
     if (!fName.isNull())
     {
         CAbstractModelLoader &loader = factory.loader(selectedFilter);
-        if (d_ptr->load(fName, loader))
+        if (d_ptr->load(fName, loader, ui->actionShading->isChecked()))
             ui->mainView->fitInView();
         else
             QMessageBox::critical(this,
@@ -223,6 +227,11 @@ void MainWindow::slExit()
     close();
 }
 
+void MainWindow::slShading(bool enabled)
+{
+    d_ptr->reDrawScene(enabled);
+}
+
 void MainWindow::slCalibAppend()
 {
     d_ptr->startAppendCalibPoint();
@@ -230,7 +239,9 @@ void MainWindow::slCalibAppend()
 
 void MainWindow::slCalibReset()
 {
-    d_ptr->resetCalibration();
+    d_ptr->vertices.Clear();
+    d_ptr->labels.Clear();
+    d_ptr->reDrawScene(ui->actionShading->isChecked());
 }
 
 void MainWindow::slViewportMouseReleased()

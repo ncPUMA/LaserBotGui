@@ -45,10 +45,11 @@
     <addaction name="actionCalibApend"/>
     <addaction name="actionCalibReset"/>
    </widget>
-   <widget class="QMenu" name="menu">
+   <widget class="QMenu" name="menuView">
     <property name="title">
      <string>Вид</string>
     </property>
+    <addaction name="actionShading"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
@@ -57,7 +58,7 @@
     <addaction name="action"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menu"/>
+   <addaction name="menuView"/>
    <addaction name="menuCalibration"/>
    <addaction name="menu_2"/>
   </widget>
@@ -96,6 +97,11 @@
   <action name="action">
    <property name="text">
     <string>О Программе</string>
+   </property>
+  </action>
+  <action name="actionShading">
+   <property name="text">
+    <string>Шейдинг</string>
    </property>
   </action>
  </widget>
