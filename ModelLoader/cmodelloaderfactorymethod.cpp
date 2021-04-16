@@ -28,7 +28,7 @@ class CModelLoaderFactoryMethodPrivate
     friend class CModelLoaderFactoryMethod;
 
     CModelLoaderFactoryMethodPrivate() {
-        appendLoader("STEP (*.step)", new CStepLoader());
+        appendLoader("STEP (*.step *.stp)", new CStepLoader());
         appendLoader("BREP (*.brep)", new CBrepLoader());
         appendLoader("IGES (*.iges)", new CIgesLoader());
         appendLoader("STL (*.stl)"  , new CStlLoader());
