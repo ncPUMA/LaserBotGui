@@ -8,7 +8,8 @@ class CAbstractBotSocketPrivate
 };
 
 CAbstractBotSocket::CAbstractBotSocket() :
-    d_ptr(new CAbstractBotSocketPrivate())
+    d_ptr(new CAbstractBotSocketPrivate()),
+    gui(nullptr)
 {
 
 }

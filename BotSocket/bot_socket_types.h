@@ -16,6 +16,10 @@ enum EN_AxisType
 };
 typedef int TAxisType;
 
+enum EN_SocketErrors
+{
+    ENSE_NO
+};
 typedef int TSocketError;
 
 }

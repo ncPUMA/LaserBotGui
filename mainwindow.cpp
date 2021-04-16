@@ -22,6 +22,18 @@
 
 #include "Calibration/ccalibrationvertexdialog.h"
 
+#include "BotSocket/cabstractbotsocket.h"
+
+class CEmptyBotSocket : public CAbstractBotSocket
+{
+public:
+    CEmptyBotSocket() : CAbstractBotSocket() { }
+
+protected:
+    BotSocket::TSocketError startSocket() final { return BotSocket::ENSE_NO; }
+    void stopSocket() final { }
+};
+
 enum EN_UserActions
 {
     ENUA_NO,
@@ -39,7 +51,8 @@ class MainWindowPrivate
 private:
     MainWindowPrivate() :
         zLayerId(Z_LAYER),
-        usrAction(ENUA_NO) { }
+        usrAction(ENUA_NO),
+        botSocket(&emptySocket) { }
 
     void init(OpenGl_GraphicDriver &driver) {
         viewer = new V3d_Viewer(&driver);
@@ -161,6 +174,9 @@ private:
     NCollection_Vector <Handle(AIS_InteractiveObject)> labels;
 
     TUserAction usrAction;
+
+    CEmptyBotSocket emptySocket;
+    CAbstractBotSocket *botSocket;
 };
 
 
@@ -198,6 +214,12 @@ void MainWindow::init(OpenGl_GraphicDriver &driver)
     ui->mainView->init(*d_ptr->context);
     connect(ui->mainView, SIGNAL(sigMouseReleased()),
             this, SLOT(slViewportMouseReleased()), Qt::QueuedConnection);
+}
+
+void MainWindow::setBotSocket(CAbstractBotSocket &botSocket)
+{
+    d_ptr->botSocket = &botSocket;
+    d_ptr->botSocket->gui = this;
 }
 
 void MainWindow::slImport()

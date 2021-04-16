@@ -9,6 +9,7 @@ QT_END_NAMESPACE
 
 class OpenGl_GraphicDriver;
 class MainWindowPrivate;
+class CAbstractBotSocket;
 
 class MainWindow : public QMainWindow
 {
@@ -19,6 +20,7 @@ public:
     ~MainWindow();
 
     void init(OpenGl_GraphicDriver &driver);
+    void setBotSocket(CAbstractBotSocket &botSocket);
 
 private slots:
     //Menu "File"
