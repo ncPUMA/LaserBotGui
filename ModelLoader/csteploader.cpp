@@ -13,7 +13,7 @@ CStepLoader::CStepLoader() :
 NCollection_Vector<Handle(AIS_InteractiveObject)> CStepLoader::loadPrivate(const char *fName)
 {
     NCollection_Vector <Handle(AIS_InteractiveObject)> result;
-    Handle(TopTools_HSequenceOfShape) aSequence = new TopTools_HSequenceOfShape();
+//    Handle(TopTools_HSequenceOfShape) aSequence = new TopTools_HSequenceOfShape();
     STEPControl_Reader aReader;
     const IFSelect_ReturnStatus aStatus = aReader.ReadFile(fName);
     if (aStatus == IFSelect_RetDone)

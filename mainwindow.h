@@ -37,6 +37,12 @@ private slots:
     //viewport
     void slViewportMouseReleased();
 
+    //dockWidget
+    void slDockLocationChanged(Qt::DockWidgetArea area);
+
+    //callib
+    void slCallibApply();
+
 private:
     Ui::MainWindow *ui;
     MainWindowPrivate * const d_ptr;

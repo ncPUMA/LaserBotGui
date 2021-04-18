@@ -11,6 +11,10 @@
 
 #include <TopoDS_Shape.hxx>
 
+//#include <SelectMgr_EntityOwner.hxx>
+//#include <StdSelect_BRepOwner.hxx>
+//#include <BRepBuilderAPI_Transform.hxx>
+
 #include "caspectwindow.h"
 
 class CMainViewportPrivate : public AIS_ViewController
@@ -60,6 +64,28 @@ class CMainViewportPrivate : public AIS_ViewController
         v3dView->ZFitAll();
         v3dView->Redraw();
     }
+
+//    void handleMoveTo(const Handle(AIS_InteractiveContext)& theCtx,
+//                      const Handle(V3d_View)& theView) final {
+
+//        TopoDS_Shape shape;
+//        for (theCtx->InitDetected(); theCtx->MoreDetected(); theCtx->NextDetected()) {
+//            Handle(SelectMgr_EntityOwner) owner = theCtx->DetectedOwner();
+//            if (Handle(StdSelect_BRepOwner) brepOwner = Handle(StdSelect_BRepOwner)::DownCast (owner)) {
+//                shape = brepOwner->Shape();
+//            }
+//        }
+//        if (!shape.IsNull() && myMousePressed != 0)
+//        {
+//            qDebug() << "move";
+//            gp_Trsf trsf = shape.Location().Transformation();
+//            trsf.SetTranslation(gp_Pnt(0.0, 0.0, 0.0), gp_Pnt(1.0, 1.0, 1.0));
+//            BRepBuilderAPI_Transform myTrsf(shape, trsf, Standard_False);
+//            shape = myTrsf.Shape();
+//        }
+//        else
+//            AIS_ViewController::handleMoveTo(theCtx, theView);
+//    }
 
     CMainViewport * const q_ptr;
 

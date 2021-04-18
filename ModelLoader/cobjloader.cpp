@@ -29,7 +29,7 @@ NCollection_Vector<Handle (AIS_InteractiveObject)> CObjLoader::loadPrivate(const
             const gp_Pnt pnt0 = mesh->Node(index0);
             const gp_Pnt pnt1 = mesh->Node(index1);
             const gp_Pnt pnt2 = mesh->Node(index2);
-            const TopoDS_Wire wire = BRepBuilderAPI_MakePolygon(pnt0, pnt1, pnt2, Standard_True);;
+            const TopoDS_Wire wire = BRepBuilderAPI_MakePolygon(pnt0, pnt1, pnt2, Standard_True);
             const TopoDS_Face face = BRepBuilderAPI_MakeFace(wire, Standard_True);
             shellBuilder.Add(shell, face);
         }

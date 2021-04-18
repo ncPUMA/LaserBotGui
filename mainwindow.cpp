@@ -16,6 +16,7 @@
 #include <StdSelect_BRepOwner.hxx>
 #include <AIS_TextLabel.hxx>
 #include <Graphic3d_ZLayerSettings.hxx>
+#include <gp_Quaternion.hxx>
 
 #include "ModelLoader/cmodelloaderfactorymethod.h"
 #include "ModelLoader/cabstractmodelloader.h"
@@ -23,6 +24,10 @@
 #include "Calibration/ccalibrationvertexdialog.h"
 
 #include "BotSocket/cabstractbotsocket.h"
+
+#include "Primitives/cbotcross.h"
+
+constexpr double DEGREE_K = M_PI / 180.;
 
 class CEmptyBotSocket : public CAbstractBotSocket
 {
@@ -73,6 +78,16 @@ private:
 
     void reDrawScene(const bool shading) {
         context->RemoveAll(Standard_False);
+
+        NCollection_Vector <Handle(AIS_InteractiveObject)> crossObj = cross.objects();
+        for(NCollection_Vector <Handle(AIS_InteractiveObject)>::Iterator it(crossObj);
+            it.More(); it.Next()) {
+            const Handle(AIS_InteractiveObject)& obj = it.Value();
+            context->Display(obj, Standard_False);
+            context->SetDisplayMode(obj, shading ? 1 : 0, false);
+            context->SetZLayer(obj, zLayerId);
+        }
+
         for(NCollection_Vector <Handle(AIS_InteractiveObject)>::Iterator it(curModels);
             it.More(); it.Next()) {
             const Handle(AIS_InteractiveObject)& obj = it.Value();
@@ -94,7 +109,7 @@ private:
         }
 
         context->Deactivate();
-        context->Activate(AIS_Shape::SelectionMode(TopAbs_FACE));
+        context->Activate(AIS_Shape::SelectionMode(TopAbs_COMPOUND));
         viewer->Redraw();
     }
 
@@ -177,6 +192,8 @@ private:
 
     CEmptyBotSocket emptySocket;
     CAbstractBotSocket *botSocket;
+
+    CBotCross cross;
 };
 
 
@@ -200,6 +217,25 @@ MainWindow::MainWindow(QWidget *parent) :
     //Menu "Calibration"
     connect(ui->actionCalibApend, SIGNAL(triggered(bool)), SLOT(slCalibAppend()));
     connect(ui->actionCalibReset, SIGNAL(triggered(bool)), SLOT(slCalibReset()));
+    ui->menuCalibration->deleteLater();
+
+    //ToolBar
+    ui->toolBar->addAction(QIcon::fromTheme("document-open"),
+                           tr("Import"),
+                           ui->actionImport,
+                           SLOT(trigger()));
+    ui->toolBar->addSeparator();
+    ui->toolBar->addAction(QIcon::fromTheme("format-justify-fill"),
+                           tr("Shading"),
+                           ui->actionShading,
+                           SLOT(toggle()));
+    ui->toolBar->addSeparator();
+
+    connect(ui->dockWidget, SIGNAL(dockLocationChanged(Qt::DockWidgetArea)),
+                            SLOT(slDockLocationChanged(Qt::DockWidgetArea)));
+
+    //Callib
+    connect(ui->pbApplyCalib, SIGNAL(clicked(bool)), SLOT(slCallibApply()));
 }
 
 MainWindow::~MainWindow()
@@ -269,5 +305,40 @@ void MainWindow::slCalibReset()
 void MainWindow::slViewportMouseReleased()
 {
     d_ptr->mouseReleased(this);
+}
+
+void MainWindow::slDockLocationChanged(Qt::DockWidgetArea area)
+{
+    delete ui->dockWidgetContents->layout();
+    QLayout *lay = nullptr;
+    if (area == Qt::LeftDockWidgetArea || area == Qt::RightDockWidgetArea)
+        lay = new QVBoxLayout(ui->dockWidgetContents);
+    else
+        lay = new QHBoxLayout(ui->dockWidgetContents);
+    lay->addWidget(ui->groupBox);
+    lay->addWidget(ui->textEdit);
+    ui->dockWidgetContents->setLayout(lay);
+}
+
+void MainWindow::slCallibApply()
+{
+    for(NCollection_Vector <Handle(AIS_InteractiveObject)>::Iterator it(d_ptr->curModels);
+        it.More(); it.Next())
+    {
+        const Handle(AIS_Shape) ais_shape = Handle(AIS_Shape)::DownCast(it.Value());
+        TopoDS_Shape shape = ais_shape->Shape();
+        gp_Trsf trsf = shape.Location().Transformation();
+        trsf.SetTranslation(gp_Pnt(0., 0., 0.),
+                            gp_Pnt(ui->dsbTrX->value(), ui->dsbTrY->value(), ui->dsbTrZ->value()));
+        gp_Quaternion quat =
+                gp_Quaternion(gp_Vec(1., 0., 0.), ui->dsbRtX->value() * DEGREE_K) *
+                gp_Quaternion(gp_Vec(0., 1., 0.), ui->dsbRtY->value() * DEGREE_K) *
+                gp_Quaternion(gp_Vec(0., 0., 1.), ui->dsbRtZ->value() * DEGREE_K);
+        trsf.SetRotation(quat);
+        shape.Location(trsf);
+        ais_shape->Set(shape);
+        d_ptr->context->Redisplay(ais_shape, Standard_True);
+    }
+
 }
 

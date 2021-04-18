@@ -18,6 +18,7 @@ SOURCES += \
     ModelLoader/cobjloader.cpp \
     ModelLoader/csteploader.cpp \
     ModelLoader/cstlloader.cpp \
+    Primitives/cbotcross.cpp \
     caspectwindow.cpp \
     cmainviewport.cpp \
     main.cpp \
@@ -34,6 +35,7 @@ HEADERS += \
     ModelLoader/cobjloader.h \
     ModelLoader/csteploader.h \
     ModelLoader/cstlloader.h \
+    Primitives/cbotcross.h \
     caspectwindow.h \
     cmainviewport.h \
     mainwindow.h
