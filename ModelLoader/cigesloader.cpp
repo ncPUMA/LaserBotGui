@@ -1,7 +1,6 @@
 #include "cigesloader.h"
 
 #include <IGESControl_Reader.hxx>
-#include <TopoDS_Shape.hxx>
 
 CIgesLoader::CIgesLoader() :
     CAbstractModelLoader()
