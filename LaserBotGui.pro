@@ -20,6 +20,7 @@ SOURCES += \
     ModelLoader/cstlloader.cpp \
     Primitives/cbotcross.cpp \
     caspectwindow.cpp \
+    cmainsettings.cpp \
     cmainviewport.cpp \
     main.cpp \
     mainwindow.cpp
@@ -36,7 +37,9 @@ HEADERS += \
     ModelLoader/csteploader.h \
     ModelLoader/cstlloader.h \
     Primitives/cbotcross.h \
+    cabstractguisettings.h \
     caspectwindow.h \
+    cmainsettings.h \
     cmainviewport.h \
     mainwindow.h
 

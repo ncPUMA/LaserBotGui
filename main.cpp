@@ -5,6 +5,8 @@
 #include <OpenGl_GraphicDriver.hxx>
 #include <OSD_Environment.hxx>
 
+#include "cmainsettings.h"
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -19,7 +21,14 @@ int main(int argc, char *argv[])
         aGraphicDriver = new OpenGl_GraphicDriver(aDisplayConnection);
     }
 
+    CMainSettings settings;
+#ifdef Q_OS_WIN
+    settings.setSettingsFName("LBOT.INI");
+#else
+    settings.setSettingsFName("conf.cfg");
+#endif
     MainWindow w;
+    w.setSettings(settings.guiSettings());
     w.init(*aGraphicDriver);
     w.show();
     return a.exec();

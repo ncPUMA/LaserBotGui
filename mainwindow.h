@@ -10,6 +10,7 @@ QT_END_NAMESPACE
 class OpenGl_GraphicDriver;
 class MainWindowPrivate;
 class CAbstractBotSocket;
+class CAbstractGuiSettings;
 
 class MainWindow : public QMainWindow
 {
@@ -20,6 +21,7 @@ public:
     ~MainWindow();
 
     void init(OpenGl_GraphicDriver &driver);
+    void setSettings(CAbstractGuiSettings &settings);
     void setBotSocket(CAbstractBotSocket &botSocket);
 
 private slots:
@@ -29,16 +31,7 @@ private slots:
 
     //Menu "View"
     void slShading(bool enabled);
-
-    //Menu "Calibration"
-    void slCalibAppend();
-    void slCalibReset();
-
-    //viewport
-    void slViewportMouseReleased();
-
-    //dockWidget
-    void slDockLocationChanged(Qt::DockWidgetArea area);
+    void slShowCalibWidget(bool enabled);
 
     //callib
     void slCallibApply();

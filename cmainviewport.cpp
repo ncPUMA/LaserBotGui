@@ -189,9 +189,6 @@ void CMainViewport::mouseReleaseEvent(QMouseEvent *event)
     const Aspect_VKeyFlags aFlags = qtMouseModifiers2VKeys(event->modifiers());
     if (d_ptr->UpdateMouseButtons(aPnt, qtMouseButtons2VKeys(event->buttons()), aFlags, false))
         update();
-
-    if (event->button() == Qt::LeftButton)
-        emit sigMouseReleased();
 }
 
 void CMainViewport::mouseMoveEvent(QMouseEvent *event)
