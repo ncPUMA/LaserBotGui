@@ -1,7 +1,6 @@
 #include "cstlloader.h"
 
 #include <RWStl.hxx>
-#include <AIS_Shape.hxx>
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
@@ -12,9 +11,9 @@ CStlLoader::CStlLoader() :
 
 }
 
-NCollection_Vector<Handle (AIS_InteractiveObject)> CStlLoader::loadPrivate(const char *fName)
+TopoDS_Shape CStlLoader::loadPrivate(const char *fName)
 {
-    NCollection_Vector <Handle (AIS_InteractiveObject)> result;
+    TopoDS_Shape result;
     Handle(Poly_Triangulation) mesh = RWStl::ReadFile(fName);
     if (!mesh.IsNull())
     {
@@ -32,10 +31,8 @@ NCollection_Vector<Handle (AIS_InteractiveObject)> CStlLoader::loadPrivate(const
             const TopoDS_Face face = BRepBuilderAPI_MakeFace(wire, Standard_True);
             shellBuilder.Add(shell, face);
         }
-
+        result = shell;
         //Handle(AIS_Triangulation) aisMesh = new AIS_Triangulation(mesh);
-        Handle(AIS_Shape) shape = new AIS_Shape(shell);
-        result.Append(shape);
     }
     return result;
 }

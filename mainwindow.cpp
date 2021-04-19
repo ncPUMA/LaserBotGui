@@ -116,32 +116,27 @@ private:
             context->SetZLayer(obj, zLayerId);
         }
 
-        for(NCollection_Vector <Handle(AIS_InteractiveObject)>::Iterator it(curModels);
-            it.More(); it.Next()) {
-            Handle(AIS_Shape) ais_shape = Handle(AIS_Shape)::DownCast(it.Value());
-            TopoDS_Shape shape = ais_shape->Shape();
-            gp_Trsf trsf = shape.Location().Transformation();
-            const gp_Vec translation(guiSettings->getTranslationX(),
-                                     guiSettings->getTranslationY(),
-                                     guiSettings->getTranslationZ());
-            const gp_Quaternion quat =
-                    gp_Quaternion(gp_Vec(1., 0., 0.), guiSettings->getRotationX() * DEGREE_K) *
-                    gp_Quaternion(gp_Vec(0., 1., 0.), guiSettings->getRotationY() * DEGREE_K) *
-                    gp_Quaternion(gp_Vec(0., 0., 1.), guiSettings->getRotationZ() * DEGREE_K);
-            trsf.SetTransformation(quat, translation);
-            shape.Location(trsf);
-            ais_shape->Set(shape);
-            context->Display(ais_shape, Standard_True);
-            context->SetDisplayMode(ais_shape, shading ? 1 : 0, false);
-        }
+        gp_Trsf trsf = curModel.Location().Transformation();
+        const gp_Vec translation(guiSettings->getTranslationX(),
+                                 guiSettings->getTranslationY(),
+                                 guiSettings->getTranslationZ());
+        const gp_Quaternion quat =
+                gp_Quaternion(gp_Vec(1., 0., 0.), guiSettings->getRotationX() * DEGREE_K) *
+                gp_Quaternion(gp_Vec(0., 1., 0.), guiSettings->getRotationY() * DEGREE_K) *
+                gp_Quaternion(gp_Vec(0., 0., 1.), guiSettings->getRotationZ() * DEGREE_K);
+        trsf.SetTransformation(quat, translation);
+        curModel.Location(trsf);
+        Handle(AIS_Shape) ais_shape = new AIS_Shape(curModel);
+        context->Display(ais_shape, Standard_True);
+        context->SetDisplayMode(ais_shape, shading ? 1 : 0, false);
 
         viewer->Redraw();
     }
 
     bool load(const QString &fName, CAbstractModelLoader &loader, const bool shading) {
-        curModels = loader.load(fName);
+        curModel = loader.load(fName.toLocal8Bit().constData());
         reDrawScene(shading);
-        return !curModels.IsEmpty();
+        return !curModel.IsNull();
     }
 
 private:
@@ -152,7 +147,8 @@ private:
     Handle(AIS_InteractiveContext) context;
     Standard_Integer zLayerId;
 
-    NCollection_Vector <Handle(AIS_InteractiveObject)> curModels;
+//    NCollection_Vector <Handle(AIS_InteractiveObject)> curModels;
+    TopoDS_Shape curModel;
 
     CEmptyBotSocket emptySocket;
     CAbstractBotSocket *botSocket;

@@ -9,7 +9,7 @@ public:
     CStlLoader();
 
 protected:
-    NCollection_Vector <Handle(AIS_InteractiveObject)> loadPrivate(const char *fName) final;
+    TopoDS_Shape loadPrivate(const char *fName) final;
 };
 
 #endif // CSTLLOADER_H

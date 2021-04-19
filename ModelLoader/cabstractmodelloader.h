@@ -1,11 +1,7 @@
 #ifndef CABSTRACTMODELLOADER_H
 #define CABSTRACTMODELLOADER_H
 
-#include <QString>
-
-#include <NCollection_Vector.hxx>
-
-class AIS_InteractiveObject;
+#include <TopoDS_Shape.hxx>
 
 class CAbstractModelLoader
 {
@@ -13,10 +9,10 @@ public:
     CAbstractModelLoader();
     virtual ~CAbstractModelLoader();
 
-    NCollection_Vector <Handle(AIS_InteractiveObject)> load(const QString &fName);
+    TopoDS_Shape load(const char *fName);
 
 protected:
-    virtual NCollection_Vector <Handle(AIS_InteractiveObject)> loadPrivate(const char *fName) = 0;
+    virtual TopoDS_Shape loadPrivate(const char *fName) = 0;
 
 private:
     CAbstractModelLoader(const CAbstractModelLoader &) = delete;

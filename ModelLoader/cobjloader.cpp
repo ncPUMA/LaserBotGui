@@ -1,7 +1,6 @@
 #include "cobjloader.h"
 
 #include <RWObj.hxx>
-#include <AIS_Shape.hxx>
 #include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_MakePolygon.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
@@ -13,9 +12,9 @@ CObjLoader::CObjLoader() :
 
 }
 
-NCollection_Vector<Handle (AIS_InteractiveObject)> CObjLoader::loadPrivate(const char *fName)
+TopoDS_Shape CObjLoader::loadPrivate(const char *fName)
 {
-    NCollection_Vector <Handle (AIS_InteractiveObject)> result;
+    TopoDS_Shape result;
     Handle(Poly_Triangulation) mesh = RWObj::ReadFile(fName);
     if (!mesh.IsNull())
     {
@@ -33,10 +32,8 @@ NCollection_Vector<Handle (AIS_InteractiveObject)> CObjLoader::loadPrivate(const
             const TopoDS_Face face = BRepBuilderAPI_MakeFace(wire, Standard_True);
             shellBuilder.Add(shell, face);
         }
-
+        result = shell;
         //Handle(AIS_Triangulation) aisMesh = new AIS_Triangulation(mesh);
-        Handle(AIS_Shape) shape = new AIS_Shape(shell);
-        result.Append(shape);
     }
     return result;
 }

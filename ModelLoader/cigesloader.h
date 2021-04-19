@@ -9,7 +9,7 @@ public:
     CIgesLoader();
 
 protected:
-    NCollection_Vector <Handle(AIS_InteractiveObject)> loadPrivate(const char *fName) final;
+    TopoDS_Shape loadPrivate(const char *fName) final;
 };
 
 #endif // CIGESLOADER_H

@@ -2,7 +2,8 @@
 
 #include <TopTools_HSequenceOfShape.hxx>
 #include <STEPControl_Reader.hxx>
-#include <AIS_Shape.hxx>
+#include <TopoDS_Compound.hxx>
+#include <TopoDS_Builder.hxx>
 
 CStepLoader::CStepLoader() :
     CAbstractModelLoader()
@@ -10,9 +11,9 @@ CStepLoader::CStepLoader() :
 
 }
 
-NCollection_Vector<Handle(AIS_InteractiveObject)> CStepLoader::loadPrivate(const char *fName)
+TopoDS_Shape CStepLoader::loadPrivate(const char *fName)
 {
-    NCollection_Vector <Handle(AIS_InteractiveObject)> result;
+    TopoDS_Shape result;
 //    Handle(TopTools_HSequenceOfShape) aSequence = new TopTools_HSequenceOfShape();
     STEPControl_Reader aReader;
     const IFSelect_ReturnStatus aStatus = aReader.ReadFile(fName);
@@ -28,13 +29,16 @@ NCollection_Vector<Handle(AIS_InteractiveObject)> CStepLoader::loadPrivate(const
           aReader.TransferRoot(i);
         }
 
+        TopoDS_Compound comp;
+        TopoDS_Builder builder;
+        builder.MakeCompound(comp);
         int aShapesNumber = aReader.NbShapes();
         for (int i = 1; i <= aShapesNumber; i++)
         {
           TopoDS_Shape aTopoShape = aReader.Shape(i);
-          Handle(AIS_Shape) shape = new AIS_Shape(aTopoShape);
-          result.Append(shape);
+          builder.Add(comp, aTopoShape);
         }
+        result = comp;
     }
     return result;
 }
