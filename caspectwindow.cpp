@@ -86,7 +86,7 @@ CAspectWindow::~CAspectWindow()
 
 Aspect_Drawable CAspectWindow::NativeHandle() const
 {
-    return static_cast <Aspect_Drawable> (d_ptr->wdgt->winId());
+    return reinterpret_cast <Aspect_Drawable> (d_ptr->wdgt->winId());
 }
 
 Aspect_Drawable CAspectWindow::NativeParentHandle() const
@@ -95,7 +95,7 @@ Aspect_Drawable CAspectWindow::NativeParentHandle() const
     const QWidget * const parent = d_ptr->wdgt->parentWidget();
     if (parent)
         parentId = parent->winId();
-    return static_cast <Aspect_Drawable> (parentId);
+    return reinterpret_cast <Aspect_Drawable> (parentId);
 }
 
 Aspect_TypeOfResize CAspectWindow::DoResize()

@@ -48,6 +48,7 @@ FORMS += \
     mainwindow.ui
 
 INCLUDEPATH += $$quote($$(CSF_OCCTIncludePath))
+LIBS += -L$$quote($$(CSF_OCCTLibPath))
 
 LIBS += -lTKernel -lTKMath -lTKService -lTKV3d -lTKOpenGl \
         -lTKBRep -lTKIGES -lTKSTL -lTKVRML -lTKSTEP -lTKSTEPAttr -lTKSTEP209 \
