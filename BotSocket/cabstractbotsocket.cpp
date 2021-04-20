@@ -1,33 +1,59 @@
 #include "cabstractbotsocket.h"
 
+#include "cabstractmodelmover.h"
+
 using namespace BotSocket;
+
+class CEmptyModelMover : public CAbstractModelMover
+{
+public:
+    CEmptyModelMover() : CAbstractModelMover() { }
+
+protected:
+    void transformModel(const BotSocket::TDistance,
+                        const BotSocket::TDistance,
+                        const BotSocket::TDistance,
+                        const BotSocket::TDegree,
+                        const BotSocket::TDegree,
+                        const BotSocket::TDegree) final { }
+
+    void socketStateChanged(const BotSocket::TSocketState) final { }
+};
+
+
 
 class CAbstractBotSocketPrivate
 {
     friend class CAbstractBotSocket;
+
+    CAbstractBotSocketPrivate() :
+        mover(&emptyMover) { }
+
+    CEmptyModelMover emptyMover;
+    CAbstractModelMover *mover;
 };
 
+
+
 CAbstractBotSocket::CAbstractBotSocket() :
-    d_ptr(new CAbstractBotSocketPrivate()),
-    gui(nullptr)
+    d_ptr(new CAbstractBotSocketPrivate())
 {
 
 }
 
-void CAbstractBotSocket::translateModel(const TDistance x,
-                                        const TDistance y,
-                                        const TDistance z)
+void CAbstractBotSocket::transformModel(const TDistance trX,
+                                        const TDistance trY,
+                                        const TDistance trZ,
+                                        const TDegree rX,
+                                        const TDegree rY,
+                                        const TDegree rZ)
 {
-    (void)x;
-    (void)y;
-    (void)z;
+    d_ptr->mover->transformModel(trX, trY, trZ, rX, rY, rZ);
 }
 
-void CAbstractBotSocket::rotateModel(const TAxisType axis,
-                                     const TDegree degree)
+void CAbstractBotSocket::stateChanged(const TSocketState state)
 {
-    (void)axis;
-    (void)degree;
+    d_ptr->mover->socketStateChanged(state);
 }
 
 CAbstractBotSocket::~CAbstractBotSocket()
@@ -55,6 +81,12 @@ uint16_t CAbstractBotSocket::getRemoteBotUdpPort() const
     return 0;
 }
 
+void CAbstractBotSocket::setModelMover(CAbstractModelMover &mover)
+{
+    d_ptr->mover = &mover;
+    d_ptr->mover->socketStateChanged(state());
+}
+
 TSocketError CAbstractBotSocket::start()
 {
     return startSocket();
@@ -63,4 +95,9 @@ TSocketError CAbstractBotSocket::start()
 void CAbstractBotSocket::stop()
 {
     stopSocket();
+}
+
+TSocketState CAbstractBotSocket::state() const
+{
+    return socketState();
 }

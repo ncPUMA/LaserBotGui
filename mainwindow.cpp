@@ -24,6 +24,7 @@
 #include "Calibration/ccalibrationvertexdialog.h"
 
 #include "BotSocket/cabstractbotsocket.h"
+#include "cmodelmover.h"
 
 #include "Primitives/cbotcross.h"
 
@@ -65,6 +66,8 @@ public:
     void setLaserLenght(const double) final { }
 };
 
+
+
 class CEmptyBotSocket : public CAbstractBotSocket
 {
 public:
@@ -73,19 +76,27 @@ public:
 protected:
     BotSocket::TSocketError startSocket() final { return BotSocket::ENSE_NO; }
     void stopSocket() final { }
+    BotSocket::TSocketState socketState() const final { return BotSocket ::ENSS_FALL; }
 };
 
+
+
 static const Standard_Integer Z_LAYER = 100;
+
+class CModelMover;
 
 class MainWindowPrivate
 {
     friend class MainWindow;
+    friend class CModelMover;
 
 private:
     MainWindowPrivate() :
         guiSettings(&emptySettings),
         zLayerId(Z_LAYER),
-        botSocket(&emptySocket) { }
+        botSocket(&emptySocket),
+        stateLamp(new QLabel())
+    { }
 
     void init(OpenGl_GraphicDriver &driver) {
         viewer = new V3d_Viewer(&driver);
@@ -117,13 +128,13 @@ private:
         }
 
         gp_Trsf trsf = curModel.Location().Transformation();
-        const gp_Vec translation(guiSettings->getTranslationX(),
-                                 guiSettings->getTranslationY(),
-                                 guiSettings->getTranslationZ());
+        const gp_Vec translation(guiSettings->getTranslationX() + mdlMover.getTrX(),
+                                 guiSettings->getTranslationY() + mdlMover.getTrY(),
+                                 guiSettings->getTranslationZ() + mdlMover.getTrZ());
         const gp_Quaternion quat =
-                gp_Quaternion(gp_Vec(1., 0., 0.), guiSettings->getRotationX() * DEGREE_K) *
-                gp_Quaternion(gp_Vec(0., 1., 0.), guiSettings->getRotationY() * DEGREE_K) *
-                gp_Quaternion(gp_Vec(0., 0., 1.), guiSettings->getRotationZ() * DEGREE_K);
+                gp_Quaternion(gp_Vec(1., 0., 0.), guiSettings->getRotationX() * DEGREE_K + mdlMover.getRX()) *
+                gp_Quaternion(gp_Vec(0., 1., 0.), guiSettings->getRotationY() * DEGREE_K + mdlMover.getRY()) *
+                gp_Quaternion(gp_Vec(0., 0., 1.), guiSettings->getRotationZ() * DEGREE_K + mdlMover.getRZ());
         trsf.SetTransformation(quat, translation);
         curModel.Location(trsf);
         Handle(AIS_Shape) ais_shape = new AIS_Shape(curModel);
@@ -147,13 +158,15 @@ private:
     Handle(AIS_InteractiveContext) context;
     Standard_Integer zLayerId;
 
-//    NCollection_Vector <Handle(AIS_InteractiveObject)> curModels;
     TopoDS_Shape curModel;
 
     CEmptyBotSocket emptySocket;
     CAbstractBotSocket *botSocket;
 
     CBotCross cross;
+    CModelMover mdlMover;
+
+    QLabel * const stateLamp;
 };
 
 
@@ -164,6 +177,8 @@ MainWindow::MainWindow(QWidget *parent) :
     d_ptr(new MainWindowPrivate())
 {
     ui->setupUi(this);
+
+    d_ptr->mdlMover.setGui(this);
 
     //Menu "File"
     connect(ui->actionImport, SIGNAL(triggered(bool)), SLOT(slImport()));
@@ -185,6 +200,17 @@ MainWindow::MainWindow(QWidget *parent) :
                            ui->actionShading,
                            SLOT(toggle()));
     ui->toolBar->addSeparator();
+    QLabel * const txtState = new QLabel(tr("Соединение: "), ui->toolBar);
+    QFont stateFnt = txtState->font();
+    stateFnt.setPointSize(18);
+    txtState->setFont(stateFnt);
+    txtState->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    txtState->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    ui->toolBar->addWidget(txtState);
+    d_ptr->stateLamp->setParent(ui->toolBar);
+    ui->toolBar->addWidget(d_ptr->stateLamp);
+    const QPixmap red(":/Lamps/Data/Lamps/red.png");
+    d_ptr->stateLamp->setPixmap(red);
 
     //Callib
     connect(ui->pbApplyCalib, SIGNAL(clicked(bool)), SLOT(slCallibApply()));
@@ -220,10 +246,31 @@ void MainWindow::setSettings(CAbstractGuiSettings &settings)
     ui->dsbLL->setValue(settings.getLaserLenght());
 }
 
-void MainWindow::setBotSocket(CAbstractBotSocket &botSocket)
+CAbstractModelMover &MainWindow::modelMover()
 {
-    d_ptr->botSocket = &botSocket;
-    d_ptr->botSocket->gui = this;
+    return d_ptr->mdlMover;
+}
+
+void MainWindow::updateMdlTransform()
+{
+    d_ptr->reDrawScene(ui->actionShading->isChecked());
+}
+
+void MainWindow::updateBotSocketState()
+{
+    static const QPixmap red(":/Lamps/Data/Lamps/red.png");
+    static const QPixmap green(":/Lamps/Data/Lamps/red.png");
+
+    if (d_ptr->mdlMover.socketState() == BotSocket::ENSS_OK)
+    {
+        d_ptr->stateLamp->setPixmap(red);
+        d_ptr->stateLamp->setToolTip(tr("Авария"));
+    }
+    else
+    {
+        d_ptr->stateLamp->setPixmap(green);
+        d_ptr->stateLamp->setToolTip(tr("OK"));
+    }
 }
 
 void MainWindow::slImport()

@@ -22,12 +22,14 @@ SOURCES += \
     caspectwindow.cpp \
     cmainsettings.cpp \
     cmainviewport.cpp \
+    cmodelmover.cpp \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     BotSocket/bot_socket_types.h \
     BotSocket/cabstractbotsocket.h \
+    BotSocket/cabstractmodelmover.h \
     Calibration/ccalibrationvertexdialog.h \
     ModelLoader/cabstractmodelloader.h \
     ModelLoader/cbreploader.h \
@@ -41,6 +43,7 @@ HEADERS += \
     caspectwindow.h \
     cmainsettings.h \
     cmainviewport.h \
+    cmodelmover.h \
     mainwindow.h
 
 FORMS += \
@@ -63,5 +66,10 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
     .gitignore \
+    Data/Lamps/green.png \
+    Data/Lamps/red.png \
     LICENSE \
     README.md
+
+RESOURCES += \
+    data.qrc
