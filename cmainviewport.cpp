@@ -45,7 +45,6 @@ class CMainViewportPrivate : public AIS_ViewController
 
         v3dView->ChangeRenderingParams().IsAntialiasingEnabled = Standard_True;
         v3dView->ChangeRenderingParams().ToShowStats = Standard_True;
-        v3dView->ChangeRenderingParams().NbMsaaSamples = 4;
 
         v3dView->MustBeResized();
 
@@ -98,6 +97,14 @@ CMainViewport::~CMainViewport()
 void CMainViewport::init(AIS_InteractiveContext &context)
 {
     d_ptr->init(context);
+}
+
+void CMainViewport::setMSAA(const GUI_TYPES::TMSAA msaa)
+{
+    Q_ASSERT(!d_ptr->v3dView.IsNull());
+
+    d_ptr->v3dView->ChangeRenderingParams().NbMsaaSamples = msaa;
+    d_ptr->v3dView->Redraw();
 }
 
 void CMainViewport::fitInView()

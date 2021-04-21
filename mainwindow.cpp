@@ -50,6 +50,7 @@ public:
     double getAnchorY() const final { return 0; }
     double getAnchorZ() const final { return 0; }
     double getLaserLenght() const final { return 0; }
+    GUI_TYPES::TMSAA getMsaa() const final { return 0; }
 
     void setTranslationX(const double) final { }
     void setTranslationY(const double) final { }
@@ -64,6 +65,7 @@ public:
     void setAnchorY(const double) final { }
     void setAnchorZ(const double) final { }
     void setLaserLenght(const double) final { }
+    void setMsaa(const GUI_TYPES::TMSAA) final { }
 };
 
 
@@ -150,6 +152,15 @@ private:
         return !curModel.IsNull();
     }
 
+    void setMSAA(const GUI_TYPES::TMSAA value, CMainViewport &view) {
+        for(auto pair : mapMsaa) {
+            pair.second->blockSignals(true);
+            pair.second->setChecked(pair.first == value);
+            pair.second->blockSignals(false);
+        }
+        view.setMSAA(value);
+    }
+
 private:
     CEmptyGuiSettings emptySettings;
     CAbstractGuiSettings *guiSettings;
@@ -169,6 +180,7 @@ private:
 
     QLabel * const stateLamp;
     QAction *startAction, *stopAction;
+    std::map <GUI_TYPES::TMSAA, QAction *> mapMsaa;
 };
 
 
@@ -190,6 +202,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionShading, SIGNAL(toggled(bool)), SLOT(slShading(bool)));
     ui->dockSettings->setVisible(false);
     connect(ui->actionCalib, SIGNAL(toggled(bool)), SLOT(slShowCalibWidget(bool)));
+    //MSAA
+    d_ptr->mapMsaa = std::map <GUI_TYPES::TMSAA, QAction *> {
+        { GUI_TYPES::ENMSAA_OFF, ui->actionMSAA_Off },
+        { GUI_TYPES::ENMSAA_2  , ui->actionMSAA_2X  },
+        { GUI_TYPES::ENMSAA_4  , ui->actionMSAA_4X  },
+        { GUI_TYPES::ENMSAA_8  , ui->actionMSAA_8X  }
+    };
+    for(auto pair : d_ptr->mapMsaa)
+        connect(pair.second, SIGNAL(toggled(bool)), SLOT(slMsaa()));
 
     //ToolBar
     ui->toolBar->addAction(QIcon::fromTheme("document-open"),
@@ -258,6 +279,8 @@ void MainWindow::setSettings(CAbstractGuiSettings &settings)
     ui->dsbAnchY->setValue(settings.getAnchorY());
     ui->dsbAnchZ->setValue(settings.getAnchorZ());
     ui->dsbLL->setValue(settings.getLaserLenght());
+
+    d_ptr->setMSAA(settings.getMsaa(), *ui->mainView);
 }
 
 void MainWindow::setBotSocket(CAbstractBotSocket &socket)
@@ -329,6 +352,21 @@ void MainWindow::slShading(bool enabled)
 void MainWindow::slShowCalibWidget(bool enabled)
 {
     ui->dockSettings->setVisible(enabled);
+}
+
+void MainWindow::slMsaa()
+{
+    GUI_TYPES::TMSAA msaa = GUI_TYPES::ENMSAA_OFF;
+    for(auto pair : d_ptr->mapMsaa)
+    {
+        if (pair.second == sender())
+        {
+            msaa = pair.first;
+            break;
+        }
+    }
+    d_ptr->setMSAA(msaa, *ui->mainView);
+    d_ptr->guiSettings->setMsaa(msaa);
 }
 
 void MainWindow::slCallibApply()

@@ -39,6 +39,7 @@ private slots:
     //Menu "View"
     void slShading(bool enabled);
     void slShowCalibWidget(bool enabled);
+    void slMsaa();
 
     //callib
     void slCallibApply();

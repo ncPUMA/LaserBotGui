@@ -27,6 +27,7 @@ enum EN_GuiKeys
     ENGK_ANCH_Y,
     ENGK_ANCH_Z,
     ENGK_LL,
+    ENGK_MSAA,
 
     ENGK_LAST
 };
@@ -45,7 +46,8 @@ static const std::map <TGuiKey, QString> guiKeyMap = {
     { ENGK_ANCH_X, "anch_x"  },
     { ENGK_ANCH_Y, "anch_y"  },
     { ENGK_ANCH_Z, "anch_z"  },
-    { ENGK_LL    , "l_laser" }
+    { ENGK_LL    , "l_laser" },
+    { ENGK_MSAA  , "msaa"    }
 };
 
 static const char *BOT_PREFIX = "BOT";
@@ -89,6 +91,7 @@ public:
     double getAnchorY() const final { return readGuiValue(ENGK_ANCH_Y); }
     double getAnchorZ() const final { return readGuiValue(ENGK_ANCH_Z); }
     double getLaserLenght() const final { return readGuiValue(ENGK_LL); }
+    GUI_TYPES::TMSAA getMsaa() const final { return static_cast <GUI_TYPES::TMSAA> (readGuiValue(ENGK_MSAA)); }
 
     void setTranslationX(const double value) final { writeGuiValue(ENGK_TR_X, value); }
     void setTranslationY(const double value) final { writeGuiValue(ENGK_TR_Y, value); }
@@ -103,6 +106,7 @@ public:
     void setAnchorY(const double value) final { writeGuiValue(ENGK_ANCH_Y, value); }
     void setAnchorZ(const double value) final { writeGuiValue(ENGK_ANCH_Z, value); }
     void setLaserLenght(const double value) final { writeGuiValue(ENGK_LL, value); }
+    void setMsaa(const GUI_TYPES::TMSAA value) final { writeGuiValue(ENGK_MSAA, value); }
 
     //CAbstractBotSocketSettings
     uint32_t getLocalIpV4() const { return readIp(BOT_PREFIX, BOT_KEY_LCL_IP); }
@@ -190,6 +194,11 @@ void CMainSettings::setSettingsFName(const char *fname)
         d_ptr->settings->setValue(BOT_KEY_REM_IP, BOT_DEF_REM_IP);
     if (!d_ptr->settings->contains(BOT_KEY_REM_PORT))
         d_ptr->settings->setValue(BOT_KEY_REM_PORT, BOT_DEF_REM_PORT);
+    d_ptr->settings->endGroup();
+
+    d_ptr->settings->beginGroup(GUI_PREFIX);
+    if (!d_ptr->settings->contains(guiKeyMap.at(ENGK_MSAA)))
+        d_ptr->settings->setValue(guiKeyMap.at(ENGK_MSAA), GUI_TYPES::ENMSAA_4);
     d_ptr->settings->endGroup();
 }
 

@@ -48,13 +48,25 @@
     <property name="title">
      <string>Вид</string>
     </property>
+    <widget class="QMenu" name="menuMSAA">
+     <property name="title">
+      <string>MSAA</string>
+     </property>
+     <addaction name="actionMSAA_Off"/>
+     <addaction name="actionMSAA_2X"/>
+     <addaction name="actionMSAA_4X"/>
+     <addaction name="actionMSAA_8X"/>
+    </widget>
     <addaction name="actionShading"/>
+    <addaction name="menuMSAA"/>
+    <addaction name="separator"/>
     <addaction name="actionCalib"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
      <string>Справка</string>
     </property>
+    <addaction name="action_3"/>
     <addaction name="action"/>
    </widget>
    <addaction name="menuFile"/>
@@ -539,6 +551,43 @@
    </property>
    <property name="text">
     <string>Калибровка</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>Помощь</string>
+   </property>
+  </action>
+  <action name="actionMSAA_Off">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Откл</string>
+   </property>
+  </action>
+  <action name="actionMSAA_2X">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MSAA 2X</string>
+   </property>
+  </action>
+  <action name="actionMSAA_4X">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MSAA 4X</string>
+   </property>
+  </action>
+  <action name="actionMSAA_8X">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MSAA 8X</string>
    </property>
   </action>
  </widget>

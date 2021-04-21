@@ -47,6 +47,7 @@ HEADERS += \
     cmainsettings.h \
     cmainviewport.h \
     cmodelmover.h \
+    gui_types.h \
     mainwindow.h
 
 FORMS += \

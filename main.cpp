@@ -30,8 +30,8 @@ int main(int argc, char *argv[])
     settings.setSettingsFName("conf.cfg");
 #endif
     MainWindow w;
-    w.setSettings(settings.guiSettings());
     w.init(*aGraphicDriver);
+    w.setSettings(settings.guiSettings());
 
     CBotSocketImitator imitator;
     imitator.setSettings(settings.socketSettings());
