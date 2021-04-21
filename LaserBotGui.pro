@@ -72,6 +72,7 @@ DISTFILES += \
     .gitignore \
     Data/Lamps/green.png \
     Data/Lamps/red.png \
+    Data/Models/plate.stp \
     LICENSE \
     README.md
 
