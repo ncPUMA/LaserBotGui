@@ -3,8 +3,10 @@
 #include <map>
 
 #include <QSettings>
+#include <QHostAddress>
 
 #include "cabstractguisettings.h"
+#include "BotSocket/cabstractbotsocketsettings.h"
 
 static const char *GUI_PREFIX = "GUI";
 
@@ -46,20 +48,34 @@ static const std::map <TGuiKey, QString> guiKeyMap = {
     { ENGK_LL    , "l_laser" }
 };
 
-class CGuiSettings;
+static const char *BOT_PREFIX = "BOT";
+static const char *BOT_KEY_LCL_IP = "lcl_ip";
+static const char *BOT_KEY_LCL_PORT = "lcl_port";
+static const char *BOT_KEY_REM_IP = "rem_ip";
+static const char *BOT_KEY_REM_PORT = "rem_port";
 
-class CMainSettingsPrivate : public CAbstractGuiSettings
+static const char *BOT_DEF_LCL_IP = "192.168.0.1";
+static const uint16_t BOT_DEF_LCL_PORT = 1122;
+static const char *BOT_DEF_REM_IP = "192.168.0.2";
+static const uint16_t BOT_DEF_REM_PORT = 2211;
+
+class CMainSettingsPrivate : public CAbstractGuiSettings, public CAbstractBotSocketSettings
 {
     friend class CMainSettings;
 
 public:
     CMainSettingsPrivate() :
-        settings(new QSettings()) { }
+        CAbstractGuiSettings(),
+        CAbstractBotSocketSettings(),
+        settings(new QSettings()) {
+
+    }
 
     ~CMainSettingsPrivate() {
         delete settings;
     }
 
+    //CAbstractGuiSettings
     double getTranslationX() const final { return readGuiValue(ENGK_TR_X); }
     double getTranslationY() const final { return readGuiValue(ENGK_TR_Y); }
     double getTranslationZ() const final { return readGuiValue(ENGK_TR_Z); }
@@ -88,6 +104,12 @@ public:
     void setAnchorZ(const double value) final { writeGuiValue(ENGK_ANCH_Z, value); }
     void setLaserLenght(const double value) final { writeGuiValue(ENGK_LL, value); }
 
+    //CAbstractBotSocketSettings
+    uint32_t getLocalIpV4() const { return readIp(BOT_PREFIX, BOT_KEY_LCL_IP); }
+    uint16_t getLocalUdpPort() const { return readIp(BOT_PREFIX, BOT_KEY_LCL_PORT); }
+    uint32_t getRemoteBotIpV4() const { return readIp(BOT_PREFIX, BOT_KEY_REM_IP); }
+    uint16_t getRemoteBotUdpPort() const { return readIp(BOT_PREFIX, BOT_KEY_REM_PORT); }
+
 private:
     double readGuiValue(const TGuiKey key) const {
         double result = 0;
@@ -107,6 +129,34 @@ private:
             settings->setValue(it->second, QVariant(value));
             settings->endGroup();
         }
+    }
+
+    uint32_t readIp(const char *group, const char *key) const {
+        QString txt;
+        settings->beginGroup(group);
+        txt = settings->value(key).toString();
+        settings->endGroup();
+        return QHostAddress(txt).toIPv4Address();
+    }
+
+    void writeIp(const char *group, const char *key, const uint32_t ip) {
+        settings->beginGroup(group);
+        settings->setValue(key, QHostAddress(ip).toString());
+        settings->endGroup();
+    }
+
+    uint16_t readPort(const char *group, const char *key) const {
+        uint16_t result = 0;
+        settings->beginGroup(group);
+        result = static_cast <uint16_t> (settings->value(key).toUInt());
+        settings->endGroup();
+        return result;
+    }
+
+    void writePort(const char *group, const char *key, const uint16_t port) {
+        settings->beginGroup(group);
+        settings->setValue(key, port);
+        settings->endGroup();
     }
 
 private:
@@ -129,10 +179,26 @@ CMainSettings::~CMainSettings()
 void CMainSettings::setSettingsFName(const char *fname)
 {
     delete d_ptr->settings;
-    d_ptr->settings = new QSettings(QString::fromLocal8Bit(fname));
+    d_ptr->settings = new QSettings(QString::fromLocal8Bit(fname), QSettings::IniFormat);
+
+    d_ptr->settings->beginGroup(BOT_PREFIX);
+    if (!d_ptr->settings->contains(BOT_KEY_LCL_IP))
+        d_ptr->settings->setValue(BOT_KEY_LCL_IP, BOT_DEF_LCL_IP);
+    if (!d_ptr->settings->contains(BOT_KEY_LCL_PORT))
+        d_ptr->settings->setValue(BOT_KEY_LCL_PORT, BOT_DEF_LCL_PORT);
+    if (!d_ptr->settings->contains(BOT_KEY_REM_IP))
+        d_ptr->settings->setValue(BOT_KEY_REM_IP, BOT_DEF_REM_IP);
+    if (!d_ptr->settings->contains(BOT_KEY_REM_PORT))
+        d_ptr->settings->setValue(BOT_KEY_REM_PORT, BOT_DEF_REM_PORT);
+    d_ptr->settings->endGroup();
 }
 
 CAbstractGuiSettings &CMainSettings::guiSettings()
+{
+    return *d_ptr;
+}
+
+CAbstractBotSocketSettings &CMainSettings::socketSettings()
 {
     return *d_ptr;
 }

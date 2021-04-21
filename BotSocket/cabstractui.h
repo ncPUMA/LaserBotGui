@@ -1,17 +1,17 @@
-#ifndef CABSTRACTMODELMOVER_H
-#define CABSTRACTMODELMOVER_H
+#ifndef CABSTRACTUI_H
+#define CABSTRACTUI_H
 
 #include "bot_socket_types.h"
 
 class CAbstractBotSocket;
 
-class CAbstractModelMover
+class CAbstractUi
 {
     friend class CAbstractBotSocket;
 
 public:
-    CAbstractModelMover() { }
-    virtual ~CAbstractModelMover() { }
+    CAbstractUi() { }
+    virtual ~CAbstractUi() { }
 
 protected:
     virtual void transformModel(const BotSocket::TDistance trX,
@@ -24,4 +24,4 @@ protected:
     virtual void socketStateChanged(const BotSocket::TSocketState state) = 0;
 };
 
-#endif // CABSTRACTMODELMOVER_H
+#endif // CABSTRACTUI_H

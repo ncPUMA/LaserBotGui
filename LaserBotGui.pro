@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -10,6 +10,7 @@ CONFIG += c++11
 
 SOURCES += \
     BotSocket/cabstractbotsocket.cpp \
+    BotSocket/cbotsocketimitator.cpp \
     Calibration/ccalibrationvertexdialog.cpp \
     ModelLoader/cabstractmodelloader.cpp \
     ModelLoader/cbreploader.cpp \
@@ -29,7 +30,9 @@ SOURCES += \
 HEADERS += \
     BotSocket/bot_socket_types.h \
     BotSocket/cabstractbotsocket.h \
-    BotSocket/cabstractmodelmover.h \
+    BotSocket/cabstractbotsocketsettings.h \
+    BotSocket/cabstractui.h \
+    BotSocket/cbotsocketimitator.h \
     Calibration/ccalibrationvertexdialog.h \
     ModelLoader/cabstractmodelloader.h \
     ModelLoader/cbreploader.h \

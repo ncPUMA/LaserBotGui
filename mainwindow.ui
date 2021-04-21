@@ -13,6 +13,12 @@
   <property name="windowTitle">
    <string>LaserBotGui</string>
   </property>
+  <property name="iconSize">
+   <size>
+    <width>48</width>
+    <height>48</height>
+   </size>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
@@ -480,12 +486,6 @@
    </property>
    <property name="movable">
     <bool>false</bool>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>48</width>
-     <height>48</height>
-    </size>
    </property>
    <property name="floatable">
     <bool>false</bool>

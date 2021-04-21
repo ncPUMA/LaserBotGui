@@ -1,12 +1,12 @@
 #ifndef CMODELMOVER_H
 #define CMODELMOVER_H
 
-#include "BotSocket/cabstractmodelmover.h"
+#include "BotSocket/cabstractui.h"
 
 class CModelMoverPrivate;
 class MainWindow;
 
-class CModelMover : public CAbstractModelMover
+class CModelMover : public CAbstractUi
 {
     friend class MainWindow;
 

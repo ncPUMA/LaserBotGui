@@ -138,8 +138,8 @@ private:
         trsf.SetTransformation(quat, translation);
         curModel.Location(trsf);
         Handle(AIS_Shape) ais_shape = new AIS_Shape(curModel);
-        context->Display(ais_shape, Standard_True);
         context->SetDisplayMode(ais_shape, shading ? 1 : 0, false);
+        context->Display(ais_shape, Standard_True);
 
         viewer->Redraw();
     }
@@ -164,9 +164,11 @@ private:
     CAbstractBotSocket *botSocket;
 
     CBotCross cross;
+
     CModelMover mdlMover;
 
     QLabel * const stateLamp;
+    QAction *startAction, *stopAction;
 };
 
 
@@ -200,17 +202,29 @@ MainWindow::MainWindow(QWidget *parent) :
                            ui->actionShading,
                            SLOT(toggle()));
     ui->toolBar->addSeparator();
+    QLabel * const strech = new QLabel(" ", ui->toolBar);
+    strech->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    ui->toolBar->addWidget(strech);
+    d_ptr->startAction = ui->toolBar->addAction(QIcon::fromTheme("media-playback-start"),
+                                                tr("Старт"),
+                                                this,
+                                                SLOT(slStart()));
+    d_ptr->startAction = ui->toolBar->addAction(QIcon::fromTheme("media-playback-stop"),
+                                                tr("Стоп"),
+                                                this,
+                                                SLOT(slStop()));
     QLabel * const txtState = new QLabel(tr("Соединение: "), ui->toolBar);
     QFont stateFnt = txtState->font();
     stateFnt.setPointSize(18);
     txtState->setFont(stateFnt);
     txtState->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    txtState->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     ui->toolBar->addWidget(txtState);
     d_ptr->stateLamp->setParent(ui->toolBar);
     ui->toolBar->addWidget(d_ptr->stateLamp);
     const QPixmap red(":/Lamps/Data/Lamps/red.png");
-    d_ptr->stateLamp->setPixmap(red);
+    d_ptr->stateLamp->setPixmap(red.scaled(ui->toolBar->iconSize(),
+                                           Qt::IgnoreAspectRatio,
+                                           Qt::SmoothTransformation));
 
     //Callib
     connect(ui->pbApplyCalib, SIGNAL(clicked(bool)), SLOT(slCallibApply()));
@@ -246,9 +260,10 @@ void MainWindow::setSettings(CAbstractGuiSettings &settings)
     ui->dsbLL->setValue(settings.getLaserLenght());
 }
 
-CAbstractModelMover &MainWindow::modelMover()
+void MainWindow::setBotSocket(CAbstractBotSocket &socket)
 {
-    return d_ptr->mdlMover;
+    d_ptr->botSocket = &socket;
+    socket.setUi(d_ptr->mdlMover);
 }
 
 void MainWindow::updateMdlTransform()
@@ -258,10 +273,16 @@ void MainWindow::updateMdlTransform()
 
 void MainWindow::updateBotSocketState()
 {
-    static const QPixmap red(":/Lamps/Data/Lamps/red.png");
-    static const QPixmap green(":/Lamps/Data/Lamps/red.png");
+    static const QPixmap red =
+            QPixmap(":/Lamps/Data/Lamps/red.png").scaled(ui->toolBar->iconSize(),
+                                                         Qt::IgnoreAspectRatio,
+                                                         Qt::SmoothTransformation);
+    static const QPixmap green =
+            QPixmap(":/Lamps/Data/Lamps/green.png").scaled(ui->toolBar->iconSize(),
+                                                         Qt::IgnoreAspectRatio,
+                                                         Qt::SmoothTransformation);
 
-    if (d_ptr->mdlMover.socketState() == BotSocket::ENSS_OK)
+    if (d_ptr->mdlMover.socketState() != BotSocket::ENSS_OK)
     {
         d_ptr->stateLamp->setPixmap(red);
         d_ptr->stateLamp->setToolTip(tr("Авария"));
@@ -327,5 +348,17 @@ void MainWindow::slCallibApply()
     d_ptr->guiSettings->setLaserLenght(ui->dsbLL->value());
 
     d_ptr->reDrawScene(ui->actionShading->isChecked());
+}
+
+void MainWindow::slStart()
+{
+    d_ptr->context->SetAutomaticHilight(Standard_False);
+    d_ptr->botSocket->start();
+}
+
+void MainWindow::slStop()
+{
+    d_ptr->botSocket->stop();
+    d_ptr->context->SetAutomaticHilight(Standard_True);
 }
 

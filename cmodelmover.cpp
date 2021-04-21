@@ -10,7 +10,9 @@ class CModelMoverPrivate
         gui(nullptr),
         trX(0), trY(0), trZ(0),
         rX(0), rY(0), rZ(0),
-        state(BotSocket::ENSS_FALL)
+        state(BotSocket::ENSS_FALL),
+        localIp(0), remoteIp(0),
+        localPort(0), remotePort(0)
     { }
 
     MainWindow *gui;
@@ -18,6 +20,8 @@ class CModelMoverPrivate
     BotSocket::TDistance trX, trY, trZ;
     BotSocket::TDegree rX, rY, rZ;
     BotSocket::TSocketState state;
+    uint32_t localIp, remoteIp;
+    uint16_t localPort, remotePort;
 };
 
 

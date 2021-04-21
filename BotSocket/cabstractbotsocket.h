@@ -5,8 +5,9 @@
 
 #include <cstdint>
 
-class CAbstractModelMover;
 class CAbstractBotSocketPrivate;
+class CAbstractUi;
+class CAbstractBotSocketSettings;
 
 class CAbstractBotSocket
 {
@@ -18,7 +19,8 @@ public:
     uint32_t getRemoteBotIpV4() const;
     uint16_t getRemoteBotUdpPort() const;
 
-    void setModelMover(CAbstractModelMover &mover);
+    void setSettings(CAbstractBotSocketSettings &settings);
+    void setUi(CAbstractUi &gui);
 
     BotSocket::TSocketError start();
     void stop();
@@ -27,6 +29,8 @@ public:
 
 protected:
     CAbstractBotSocket();
+
+    virtual void settingsChanged() { }
 
     virtual BotSocket::TSocketError startSocket() = 0;
     virtual void stopSocket() = 0;

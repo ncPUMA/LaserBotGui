@@ -28,8 +28,6 @@ class CMainViewportPrivate : public AIS_ViewController
     void init(AIS_InteractiveContext &extContext) {
         context = &extContext;
         v3dView = context->CurrentViewer()->CreateView().get();
-
-        SetAllowRotation(Standard_True);
         v3dView->SetBackgroundColor(Quantity_Color(0.3, 0.3, 0.3, Quantity_TOC_RGB));
 
         aspect = new CAspectWindow(*q_ptr);
@@ -42,6 +40,12 @@ class CMainViewportPrivate : public AIS_ViewController
         myMouseGestureMap.Clear();
         myMouseGestureMap.Bind(Aspect_VKeyMouse_LeftButton, AIS_MouseGesture_Pan);
         myMouseGestureMap.Bind(Aspect_VKeyMouse_RightButton, AIS_MouseGesture_RotateOrbit);
+
+        SetAllowRotation(Standard_True);
+
+        v3dView->ChangeRenderingParams().IsAntialiasingEnabled = Standard_True;
+        v3dView->ChangeRenderingParams().ToShowStats = Standard_True;
+        v3dView->ChangeRenderingParams().NbMsaaSamples = 4;
 
         v3dView->MustBeResized();
 
@@ -65,27 +69,6 @@ class CMainViewportPrivate : public AIS_ViewController
         v3dView->Redraw();
     }
 
-//    void handleMoveTo(const Handle(AIS_InteractiveContext)& theCtx,
-//                      const Handle(V3d_View)& theView) final {
-
-//        TopoDS_Shape shape;
-//        for (theCtx->InitDetected(); theCtx->MoreDetected(); theCtx->NextDetected()) {
-//            Handle(SelectMgr_EntityOwner) owner = theCtx->DetectedOwner();
-//            if (Handle(StdSelect_BRepOwner) brepOwner = Handle(StdSelect_BRepOwner)::DownCast (owner)) {
-//                shape = brepOwner->Shape();
-//            }
-//        }
-//        if (!shape.IsNull() && myMousePressed != 0)
-//        {
-//            qDebug() << "move";
-//            gp_Trsf trsf = shape.Location().Transformation();
-//            trsf.SetTranslation(gp_Pnt(0.0, 0.0, 0.0), gp_Pnt(1.0, 1.0, 1.0));
-//            BRepBuilderAPI_Transform myTrsf(shape, trsf, Standard_False);
-//            shape = myTrsf.Shape();
-//        }
-//        else
-//            AIS_ViewController::handleMoveTo(theCtx, theView);
-//    }
 
     CMainViewport * const q_ptr;
 
