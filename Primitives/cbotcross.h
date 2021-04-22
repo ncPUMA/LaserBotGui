@@ -12,7 +12,7 @@ public:
     CBotCross();
     virtual ~CBotCross();
 
-    NCollection_Vector <Handle(AIS_InteractiveObject)> objects() const;
+    NCollection_Vector <Handle(AIS_InteractiveObject)> objects(const char *text) const;
 
 private:
     CBotCross(const CBotCross &) = delete;

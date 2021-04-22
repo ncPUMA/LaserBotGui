@@ -16,7 +16,7 @@
 #include <StdSelect_BRepOwner.hxx>
 #include <AIS_TextLabel.hxx>
 #include <Graphic3d_ZLayerSettings.hxx>
-#include <gp_Quaternion.hxx>
+#include <BRepBuilderAPI_GTransform.hxx>
 
 #include "ModelLoader/cmodelloaderfactorymethod.h"
 #include "ModelLoader/cabstractmodelloader.h"
@@ -120,7 +120,16 @@ private:
     void reDrawScene(const bool shading) {
         context->RemoveAll(Standard_False);
 
-        NCollection_Vector <Handle(AIS_InteractiveObject)> crossObj = cross.objects();
+        const QString botTxt = QString("Coord:\n   X: %1\n   Y: %2\n   Z: %3\n"
+                                       "Ang:\n   X: %4\n   Y: %5\n   Z: %6")
+                .arg(mdlMover.getTrX(), 10, 'f', 6, QChar('0'))
+                .arg(mdlMover.getTrY(), 10, 'f', 6, QChar('0'))
+                .arg(mdlMover.getTrZ(), 10, 'f', 6, QChar('0'))
+                .arg(mdlMover.getRX() , 10, 'f', 6, QChar('0'))
+                .arg(mdlMover.getRY() , 10, 'f', 6, QChar('0'))
+                .arg(mdlMover.getRZ() , 10, 'f', 6, QChar('0'));
+        NCollection_Vector <Handle(AIS_InteractiveObject)> crossObj =
+                cross.objects(botTxt.toLocal8Bit().constData());
         for(NCollection_Vector <Handle(AIS_InteractiveObject)>::Iterator it(crossObj);
             it.More(); it.Next()) {
             const Handle(AIS_InteractiveObject)& obj = it.Value();
@@ -129,16 +138,26 @@ private:
             context->SetZLayer(obj, zLayerId);
         }
 
-        gp_Trsf trsf = curModel.Location().Transformation();
+        //translation
+        gp_Trsf trsfTr = curModel.Location().Transformation();
         const gp_Vec translation(guiSettings->getTranslationX() + mdlMover.getTrX(),
                                  guiSettings->getTranslationY() + mdlMover.getTrY(),
                                  guiSettings->getTranslationZ() + mdlMover.getTrZ());
-        const gp_Quaternion quat =
-                gp_Quaternion(gp_Vec(1., 0., 0.), guiSettings->getRotationX() * DEGREE_K + mdlMover.getRX()) *
-                gp_Quaternion(gp_Vec(0., 1., 0.), guiSettings->getRotationY() * DEGREE_K + mdlMover.getRY()) *
-                gp_Quaternion(gp_Vec(0., 0., 1.), guiSettings->getRotationZ() * DEGREE_K + mdlMover.getRZ());
-        trsf.SetTransformation(quat, translation);
-        curModel.Location(trsf);
+        trsfTr.SetTranslation(translation);
+
+        //rotation
+        const gp_Pnt anchor(guiSettings->getAnchorX(), guiSettings->getAnchorY(), guiSettings->getAnchorZ());
+        gp_Trsf trsfRX = curModel.Location().Transformation();
+        trsfRX.SetRotation(gp_Ax1(anchor, gp_Dir(1.,0.,0.)),
+                           guiSettings->getRotationX() * DEGREE_K + mdlMover.getRX() * DEGREE_K);
+        gp_Trsf trsfRY = curModel.Location().Transformation();
+        trsfRY.SetRotation(gp_Ax1(anchor, gp_Dir(0.,1.,0.)),
+                           guiSettings->getRotationY() * DEGREE_K + mdlMover.getRY() * DEGREE_K);
+        gp_Trsf trsfRZ = curModel.Location().Transformation();
+        trsfRZ.SetRotation(gp_Ax1(anchor, gp_Dir(0.,0.,1.)),
+                           guiSettings->getRotationZ() * DEGREE_K + mdlMover.getRZ() * DEGREE_K);
+
+        curModel.Location(trsfTr * trsfRX * trsfRY * trsfRZ);
         Handle(AIS_Shape) ais_shape = new AIS_Shape(curModel);
         context->SetDisplayMode(ais_shape, shading ? 1 : 0, false);
         context->Display(ais_shape, Standard_True);
@@ -147,7 +166,8 @@ private:
     }
 
     bool load(const QString &fName, CAbstractModelLoader &loader, const bool shading) {
-        curModel = loader.load(fName.toLocal8Bit().constData());
+        const TopoDS_Shape shape = loader.load(fName.toLocal8Bit().constData());
+        curModel = affinityTransform(shape);
         reDrawScene(shading);
         return !curModel.IsNull();
     }
@@ -159,6 +179,24 @@ private:
             pair.second->blockSignals(false);
         }
         view.setMSAA(value);
+    }
+
+    TopoDS_Shape affinityTransform(const TopoDS_Shape &shape) const {
+        if (guiSettings->getScaleX() != 0 &&
+            guiSettings->getScaleY() != 0 &&
+            guiSettings->getScaleZ() != 0) {
+            const gp_Pnt anchor(guiSettings->getAnchorX(),
+                                guiSettings->getAnchorY(),
+                                guiSettings->getAnchorZ());
+            gp_GTrsf gtrsfX(shape.Location().Transformation());
+            gtrsfX.SetAffinity(gp_Ax1(anchor, gp_Dir(1., 0., 0.)), guiSettings->getScaleX());
+            gp_GTrsf gtrsfY(shape.Location().Transformation());
+            gtrsfY.SetAffinity(gp_Ax1(anchor, gp_Dir(0., 1., 0.)), guiSettings->getScaleY());
+            gp_GTrsf gtrsfZ(shape.Location().Transformation());
+            gtrsfZ.SetAffinity(gp_Ax1(anchor, gp_Dir(0., 0., 1.)), guiSettings->getScaleZ());
+            return BRepBuilderAPI_GTransform(shape, gtrsfX * gtrsfY * gtrsfZ, true).Shape();
+        }
+        return shape;
     }
 
 private:
@@ -384,6 +422,8 @@ void MainWindow::slCallibApply()
     d_ptr->guiSettings->setAnchorY(ui->dsbAnchY->value());
     d_ptr->guiSettings->setAnchorZ(ui->dsbAnchZ->value());
     d_ptr->guiSettings->setLaserLenght(ui->dsbLL->value());
+
+//    d_ptr->curModel = d_ptr->affinityTransform(d_ptr->curModel);
 
     d_ptr->reDrawScene(ui->actionShading->isChecked());
 }

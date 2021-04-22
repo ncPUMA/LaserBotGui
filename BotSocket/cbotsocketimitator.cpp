@@ -69,6 +69,10 @@ void CBotSocketImitator::slTmTimeout()
 //    d_ptr->tx += .5;
 //    if (d_ptr->tx >= 50.)
 //        d_ptr->tx = 0;
+//    d_ptr->rx += .5;
+//    if (d_ptr->rx >= 90.)
+//        d_ptr->rx = 0;
+
 //    transformModel(d_ptr->tx, d_ptr->ty, d_ptr->tz,
 //                   d_ptr->rx, d_ptr->ry, d_ptr->rz);
 }

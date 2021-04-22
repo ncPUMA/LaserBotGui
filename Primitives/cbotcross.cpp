@@ -1,5 +1,7 @@
 #include "cbotcross.h"
 
+#include <sstream>
+
 #include <AIS_Point.hxx>
 #include <Geom_CartesianPoint.hxx>
 #include <AIS_TextLabel.hxx>
@@ -35,10 +37,11 @@ CBotCross::~CBotCross()
     delete d_ptr;
 }
 
-NCollection_Vector<Handle (AIS_InteractiveObject)> CBotCross::objects() const
+NCollection_Vector<Handle (AIS_InteractiveObject)> CBotCross::objects(const char *text) const
 {
     NCollection_Vector<Handle (AIS_InteractiveObject)> result;
     result.Append(d_ptr->point);
+    d_ptr->txtCoord->SetText(text);
     result.Append(d_ptr->txtCoord);
     return result;
 }
