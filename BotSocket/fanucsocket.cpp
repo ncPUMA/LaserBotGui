@@ -35,7 +35,7 @@
 FanucSocket::FanucSocket(QObject *parent):
     QObject(parent)
 {
-    assert(sizeof(struct position) == 36);
+    assert(sizeof(struct xyzwpr) == 36);
     assert(sizeof(struct xyzwprext) == 48);
 
     connect(&socket_, &QAbstractSocket::connected, this, &FanucSocket::on_connected);
@@ -92,13 +92,20 @@ void FanucSocket::on_readyread()
 
         for(int i=0; i<9; i++)
             s.j.j[i] = s.j.j[i] * 180/M_PI;
-        qDebug("Pos: t=%f u=(%f, %f, %f, %f, %f, %f, %d) w=(%f, %f, %f, %f, %f, %f, %d) j=(%f, %f, %f, %f, %f, %f, %f, %f, %f)\n",
-                     ((double)s.time)/1e6,
-                     s.u.x, s.u.y, s.u.z, s.u.w, s.u.p, s.u.r, s.u.config,
-                     s.w.x, s.w.y, s.w.z, s.w.w, s.w.p, s.w.r, s.w.config,
-                     s.j.j[0], s.j.j[1], s.j.j[2], s.j.j[3], s.j.j[4], s.j.j[5], s.j.j[6], s.j.j[7], s.j.j[8]);
+//        qDebug("Pos: t=%f u=(%f, %f, %f, %f, %f, %f, %d) w=(%f, %f, %f, %f, %f, %f, %d) j=(%f, %f, %f, %f, %f, %f, %f, %f, %f)\n",
+//                     ((double)s.time)/1e6,
+//                     s.u.x, s.u.y, s.u.z, s.u.w, s.u.p, s.u.r, s.u.config,
+//                     s.w.x, s.w.y, s.w.z, s.w.w, s.w.p, s.w.r, s.w.config,
+//                     s.j.j[0], s.j.j[1], s.j.j[2], s.j.j[3], s.j.j[4], s.j.j[5], s.j.j[6], s.j.j[7], s.j.j[8]);
 
-        FanucSocket::position pos{s.w.x, s.w.y, s.w.z, s.w.w, s.w.p, s.w.r};
+        FanucSocket::position pos{s.w.x - offset_.x,
+                                  s.w.y - offset_.y,
+                                  s.w.z - offset_.z,
+                                  s.w.w - offset_.w,
+                                  s.w.p - offset_.p,
+                                  s.w.r - offset_.r};
+        qDebug("Pos: t=%f pos=(%f, %f, %f, %f, %f, %f)\n",
+               ((double)s.time)/1e6, pos.x, pos.y, pos.z, pos.w, pos.p, pos.r);
         emit position_received(pos);
     }
 }
@@ -109,9 +116,18 @@ void FanucSocket::start_connection()
        socket_.state() != QAbstractSocket::ConnectedState)
     {
         QSettings settings("fanuc.ini", QSettings::IniFormat);
+
+        offset_.x = settings.value("offset_x",0).toFloat();
+        offset_.y = settings.value("offset_y",0).toFloat();
+        offset_.z = settings.value("offset_z",0).toFloat();
+        offset_.w = settings.value("offset_w",0).toFloat();
+        offset_.p = settings.value("offset_p",0).toFloat();
+        offset_.r = settings.value("offset_r",0).toFloat();
+
         QString host = settings.value("server_ip", "127.0.0.1").toString();
         int port = settings.value("server_port", 59002).toInt();
         qDebug() << "Connecting to" << host << ":" << port;
+
         socket_.connectToHost(host, port);
     }
 }

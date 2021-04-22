@@ -31,6 +31,7 @@ private:
     void start_connection();
 
     QTcpSocket socket_;
+    position offset_;
 };
 
 #endif // FANUCSOCKET_H
