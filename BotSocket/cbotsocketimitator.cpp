@@ -1,4 +1,5 @@
 #include "cbotsocketimitator.h"
+#include "fanuc_imitation_data.h"
 
 #include <QTimer>
 
@@ -16,9 +17,9 @@ class CBotSocketImitatorPrivate
     QTimer tm;
     double tx, ty, tz;
     double rx, ry, rz;
+
+    size_t imitation_data_idx = 0;
 };
-
-
 
 CBotSocketImitator::CBotSocketImitator() :
     CAbstractBotSocket(),
@@ -58,9 +59,15 @@ BotSocket::TSocketState CBotSocketImitator::socketState() const
 
 void CBotSocketImitator::slTmTimeout()
 {
-    d_ptr->tx += .5;
-    if (d_ptr->tx >= 50.)
-        d_ptr->tx = 0;
-    transformModel(d_ptr->tx, d_ptr->ty, d_ptr->tz,
-                   d_ptr->rx, d_ptr->ry, d_ptr->rz);
+    fanuc_imitation_pos pos = fanuc_imitation_data[d_ptr->imitation_data_idx];
+    d_ptr->imitation_data_idx = (d_ptr->imitation_data_idx+1) % fanuc_imitation_data_size;
+    transformModel(pos.x, pos.y, pos.z,
+                   pos.w, pos.p, pos.r);
+
+
+//    d_ptr->tx += .5;
+//    if (d_ptr->tx >= 50.)
+//        d_ptr->tx = 0;
+//    transformModel(d_ptr->tx, d_ptr->ty, d_ptr->tz,
+//                   d_ptr->rx, d_ptr->ry, d_ptr->rz);
 }

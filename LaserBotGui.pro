@@ -33,6 +33,7 @@ HEADERS += \
     BotSocket/bot_socket_types.h \
     BotSocket/cabstractbotsocket.h \
     BotSocket/cfanucbotsocket.h \
+    BotSocket/fanuc_imitation_data.h \
     BotSocket/fanucsocket.h \
     BotSocket/cabstractbotsocketsettings.h \
     BotSocket/cabstractui.h \
