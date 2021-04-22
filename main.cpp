@@ -8,6 +8,7 @@
 #include "cmainsettings.h"
 
 #include "BotSocket/cbotsocketimitator.h"
+#include "BotSocket/cfanucbotsocket.h"
 
 int main(int argc, char *argv[])
 {
@@ -33,10 +34,13 @@ int main(int argc, char *argv[])
     w.init(*aGraphicDriver);
     w.setSettings(settings.guiSettings());
 
-    CBotSocketImitator imitator;
-    imitator.setSettings(settings.socketSettings());
-    imitator.setMessageInterval(20);
-    w.setBotSocket(imitator);
+    // TODO: fabrique?
+//    CBotSocketImitator imitator;
+//    imitator.setSettings(settings.socketSettings());
+//    imitator.setMessageInterval(20);
+
+    CFanucBotSocket fanucSocket;
+    w.setBotSocket(fanucSocket);
 
     w.show();
     return a.exec();

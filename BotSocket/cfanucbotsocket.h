@@ -12,8 +12,10 @@ public:
 
     BotSocket::TSocketError startSocket();
     void stopSocket();
+    BotSocket::TSocketState socketState() const;
 
 private:
+    bool active_ = false;
     FanucSocket fanuc_socket_;
 };
 

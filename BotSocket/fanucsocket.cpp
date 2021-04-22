@@ -73,6 +73,7 @@ void FanucSocket::on_error(QAbstractSocket::SocketError error)
 {
     qDebug("Error %d", error);
     socket_.disconnectFromHost();
+    QTimer::singleShot(1000, this, &FanucSocket::start_connection);
     emit connection_state_changed(false);
 }
 
@@ -97,18 +98,20 @@ void FanucSocket::on_readyread()
                      s.w.x, s.w.y, s.w.z, s.w.w, s.w.p, s.w.r, s.w.config,
                      s.j.j[0], s.j.j[1], s.j.j[2], s.j.j[3], s.j.j[4], s.j.j[5], s.j.j[6], s.j.j[7], s.j.j[8]);
 
-        emit position_received(s.w.x, s.w.y, s.w.z);
-        emit angle_received(BotSocket::ENAT_X, s.w.w * M_PI / 180);
-        emit angle_received(BotSocket::ENAT_Y, s.w.p * M_PI / 180);
-        emit angle_received(BotSocket::ENAT_Z, s.w.r * M_PI / 180);
+        FanucSocket::xyzwpr pos{s.w.x, s.w.y, s.w.z, s.w.w, s.w.p, s.w.r};
+        emit position_received(pos);
     }
 }
 
 void FanucSocket::start_connection()
 {
-    QSettings settings("fanuc.ini", QSettings::IniFormat);
-    QString host = settings.value("server_ip", "127.0.0.1").toString();
-    int port = settings.value("server_port", 59002).toInt();
-    qDebug() << "Connecting to" << host << ":" << port;
-    socket_.connectToHost(host, port);
+    if(socket_.state() != QAbstractSocket::ConnectingState &&
+       socket_.state() != QAbstractSocket::ConnectedState)
+    {
+        QSettings settings("fanuc.ini", QSettings::IniFormat);
+        QString host = settings.value("server_ip", "127.0.0.1").toString();
+        int port = settings.value("server_port", 59002).toInt();
+        qDebug() << "Connecting to" << host << ":" << port;
+        socket_.connectToHost(host, port);
+    }
 }
