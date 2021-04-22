@@ -4,7 +4,7 @@ BotSocket::TSocketError CFanucBotSocket::startSocket()
 {
     active_ = true;
     // connect signals so translateModel/rotateModel are called
-    QObject::connect(&fanuc_socket_, &FanucSocket::position_received, [&](struct FanucSocket::xyzwpr pos){
+    QObject::connect(&fanuc_socket_, &FanucSocket::position_received, [&](struct FanucSocket::position pos){
         transformModel(pos.x, pos.y, pos.z, pos.w, pos.p, pos.r);
     });
     QObject::connect(&fanuc_socket_, &FanucSocket::connection_state_changed, [&](bool ok){

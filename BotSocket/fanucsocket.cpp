@@ -35,7 +35,7 @@
 FanucSocket::FanucSocket(QObject *parent):
     QObject(parent)
 {
-    assert(sizeof(struct xyzwpr) == 36);
+    assert(sizeof(struct position) == 36);
     assert(sizeof(struct xyzwprext) == 48);
 
     connect(&socket_, &QAbstractSocket::connected, this, &FanucSocket::on_connected);
@@ -98,7 +98,7 @@ void FanucSocket::on_readyread()
                      s.w.x, s.w.y, s.w.z, s.w.w, s.w.p, s.w.r, s.w.config,
                      s.j.j[0], s.j.j[1], s.j.j[2], s.j.j[3], s.j.j[4], s.j.j[5], s.j.j[6], s.j.j[7], s.j.j[8]);
 
-        FanucSocket::xyzwpr pos{s.w.x, s.w.y, s.w.z, s.w.w, s.w.p, s.w.r};
+        FanucSocket::position pos{s.w.x, s.w.y, s.w.z, s.w.w, s.w.p, s.w.r};
         emit position_received(pos);
     }
 }

@@ -8,7 +8,7 @@ class FanucSocket : public QObject
 {
     Q_OBJECT
 public:
-    struct xyzwpr{
+    struct position{
         double x,y,z; // mm
         double w,p,r; // radians
     };
@@ -18,7 +18,7 @@ public:
     bool connected() const;
 
 signals:
-    void position_received(struct xyzwpr pos);
+    void position_received(struct position pos);
     void connection_state_changed(bool connected);
 
 private slots:
