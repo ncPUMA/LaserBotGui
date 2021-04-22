@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 
+#include <QDebug>
 #include <QApplication>
 
 #include <OpenGl_GraphicDriver.hxx>
