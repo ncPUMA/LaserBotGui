@@ -10,6 +10,8 @@ CONFIG += c++11
 
 SOURCES += \
     BotSocket/cabstractbotsocket.cpp \
+    BotSocket/cfanucbotsocket.cpp \
+    BotSocket/fanucsocket.cpp \
     BotSocket/cbotsocketimitator.cpp \
     Calibration/ccalibrationvertexdialog.cpp \
     ModelLoader/cabstractmodelloader.cpp \
@@ -30,6 +32,9 @@ SOURCES += \
 HEADERS += \
     BotSocket/bot_socket_types.h \
     BotSocket/cabstractbotsocket.h \
+    BotSocket/cfanucbotsocket.h \
+    BotSocket/fanuc_imitation_data.h \
+    BotSocket/fanucsocket.h \
     BotSocket/cabstractbotsocketsettings.h \
     BotSocket/cabstractui.h \
     BotSocket/cbotsocketimitator.h \
@@ -55,6 +60,7 @@ FORMS += \
     mainwindow.ui
 
 INCLUDEPATH += $$quote($$(CSF_OCCTIncludePath))
+LIBS += -L$$quote($$(CSF_OCCTLibPath))
 
 LIBS += -lTKernel -lTKMath -lTKService -lTKV3d -lTKOpenGl \
         -lTKBRep -lTKIGES -lTKSTL -lTKVRML -lTKSTEP -lTKSTEPAttr -lTKSTEP209 \
