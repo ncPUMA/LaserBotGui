@@ -1,7 +1,8 @@
 #include "cbotsocketimitator.h"
-#include "fanuc_imitation_data.h"
 
 #include <QTimer>
+
+#include "fanuc_imitation_data.h"
 
 static const int DEFAULT_TM_INTERVAL = 20;
 
@@ -60,7 +61,7 @@ BotSocket::TSocketState CBotSocketImitator::socketState() const
 void CBotSocketImitator::slTmTimeout()
 {
     fanuc_imitation_pos pos = fanuc_imitation_data[d_ptr->imitation_data_idx];
-    d_ptr->imitation_data_idx = (d_ptr->imitation_data_idx+1) % fanuc_imitation_data_size;
+    d_ptr->imitation_data_idx = (d_ptr->imitation_data_idx + 1) % fanuc_imitation_data_size;
     transformModel(pos.x, pos.y, pos.z,
                    pos.w, pos.p, pos.r);
 

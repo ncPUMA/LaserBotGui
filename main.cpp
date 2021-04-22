@@ -13,6 +13,15 @@
 
 int main(int argc, char *argv[])
 {
+    //arg parsing
+    bool bImitator = false;
+    for(int i = 0; i < argc; ++i)
+    {
+        const char *arg = argv[i];
+        if (strcmp(arg, "--imitator") == 0)
+            bImitator = true;
+    }
+
     QApplication a(argc, argv);
 
     static Handle(OpenGl_GraphicDriver) aGraphicDriver;
@@ -34,15 +43,19 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.init(*aGraphicDriver);
     w.setSettings(settings.guiSettings());
-
-    // TODO: fabrique?
-//    CBotSocketImitator imitator;
-//    imitator.setSettings(settings.socketSettings());
-//    imitator.setMessageInterval(20);
-
-    CFanucBotSocket fanucSocket;
-    w.setBotSocket(fanucSocket);
-
+    CAbstractBotSocket *botSocket = nullptr;
+    if (bImitator)
+    {
+        CBotSocketImitator * const imitator = new CBotSocketImitator();
+        imitator->setMessageInterval(20);
+        botSocket = imitator;
+    }
+    else
+        botSocket = new CFanucBotSocket();
+    botSocket->setSettings(settings.socketSettings());
+    w.setBotSocket(*botSocket);
     w.show();
-    return a.exec();
+    const int retCode = a.exec();
+    delete botSocket;
+    return retCode;
 }
