@@ -2,6 +2,7 @@
 #define CMAINSETTINGS_H
 
 class CAbstractGuiSettings;
+class CAbstractBotSocketSettings;
 class CMainSettingsPrivate;
 
 class CMainSettings
@@ -13,6 +14,7 @@ public:
     void setSettingsFName(const char *fname);
 
     CAbstractGuiSettings& guiSettings();
+    CAbstractBotSocketSettings& socketSettings();
 
 private:
     CMainSettings(const CMainSettings &) = delete;

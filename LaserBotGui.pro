@@ -12,6 +12,7 @@ SOURCES += \
     BotSocket/cabstractbotsocket.cpp \
     BotSocket/cfanucbotsocket.cpp \
     BotSocket/fanucsocket.cpp \
+    BotSocket/cbotsocketimitator.cpp \
     Calibration/ccalibrationvertexdialog.cpp \
     ModelLoader/cabstractmodelloader.cpp \
     ModelLoader/cbreploader.cpp \
@@ -24,6 +25,7 @@ SOURCES += \
     caspectwindow.cpp \
     cmainsettings.cpp \
     cmainviewport.cpp \
+    cmodelmover.cpp \
     main.cpp \
     mainwindow.cpp
 
@@ -32,6 +34,9 @@ HEADERS += \
     BotSocket/cabstractbotsocket.h \
     BotSocket/cfanucbotsocket.h \
     BotSocket/fanucsocket.h \
+    BotSocket/cabstractbotsocketsettings.h \
+    BotSocket/cabstractui.h \
+    BotSocket/cbotsocketimitator.h \
     Calibration/ccalibrationvertexdialog.h \
     ModelLoader/cabstractmodelloader.h \
     ModelLoader/cbreploader.h \
@@ -45,6 +50,8 @@ HEADERS += \
     caspectwindow.h \
     cmainsettings.h \
     cmainviewport.h \
+    cmodelmover.h \
+    gui_types.h \
     mainwindow.h
 
 FORMS += \
@@ -68,5 +75,11 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
     .gitignore \
+    Data/Lamps/green.png \
+    Data/Lamps/red.png \
+    Data/Models/plate.stp \
     LICENSE \
     README.md
+
+RESOURCES += \
+    data.qrc

@@ -7,6 +7,8 @@
 
 #include "cmainsettings.h"
 
+#include "BotSocket/cbotsocketimitator.h"
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -28,8 +30,14 @@ int main(int argc, char *argv[])
     settings.setSettingsFName("conf.cfg");
 #endif
     MainWindow w;
-    w.setSettings(settings.guiSettings());
     w.init(*aGraphicDriver);
+    w.setSettings(settings.guiSettings());
+
+    CBotSocketImitator imitator;
+    imitator.setSettings(settings.socketSettings());
+    imitator.setMessageInterval(20);
+    w.setBotSocket(imitator);
+
     w.show();
     return a.exec();
 }

@@ -1,6 +1,8 @@
 #ifndef CABSTRACTGUISETTINGS_H
 #define CABSTRACTGUISETTINGS_H
 
+#include "gui_types.h"
+
 class CAbstractGuiSettings
 {
 public:
@@ -20,6 +22,7 @@ public:
     virtual double getAnchorY() const = 0;
     virtual double getAnchorZ() const = 0;
     virtual double getLaserLenght() const = 0;
+    virtual GUI_TYPES::TMSAA getMsaa() const = 0;
 
     virtual void setTranslationX(const double value) = 0;
     virtual void setTranslationY(const double value) = 0;
@@ -34,6 +37,7 @@ public:
     virtual void setAnchorY(const double value) = 0;
     virtual void setAnchorZ(const double value) = 0;
     virtual void setLaserLenght(const double value) = 0;
+    virtual void setMsaa(const GUI_TYPES::TMSAA value) = 0;
 };
 
 #endif // CABSTRACTGUISETTINGS_H

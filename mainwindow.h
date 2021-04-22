@@ -9,12 +9,15 @@ QT_END_NAMESPACE
 
 class OpenGl_GraphicDriver;
 class MainWindowPrivate;
-class CAbstractBotSocket;
 class CAbstractGuiSettings;
+
+class CAbstractBotSocket;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
+
+    friend class CModelMover;
 
 public:
     MainWindow(QWidget *parent = nullptr);
@@ -22,7 +25,11 @@ public:
 
     void init(OpenGl_GraphicDriver &driver);
     void setSettings(CAbstractGuiSettings &settings);
-    void setBotSocket(CAbstractBotSocket &botSocket);
+    void setBotSocket(CAbstractBotSocket &socket);
+
+protected:
+    void updateMdlTransform();
+    void updateBotSocketState();
 
 private slots:
     //Menu "File"
@@ -32,9 +39,14 @@ private slots:
     //Menu "View"
     void slShading(bool enabled);
     void slShowCalibWidget(bool enabled);
+    void slMsaa();
 
     //callib
     void slCallibApply();
+
+    //socket
+    void slStart();
+    void slStop();
 
 private:
     Ui::MainWindow *ui;

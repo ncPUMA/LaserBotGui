@@ -3,6 +3,8 @@
 
 #include <QWidget>
 
+#include "gui_types.h"
+
 class CMainViewportPrivate;
 class AIS_InteractiveContext;
 
@@ -15,6 +17,7 @@ public:
 
     void init(AIS_InteractiveContext &context);
 
+    void setMSAA(const GUI_TYPES::TMSAA msaa);
     void fitInView();
 
 protected:

@@ -24,6 +24,7 @@
 #include "Calibration/ccalibrationvertexdialog.h"
 
 #include "BotSocket/cabstractbotsocket.h"
+#include "cmodelmover.h"
 
 #include "Primitives/cbotcross.h"
 
@@ -49,6 +50,7 @@ public:
     double getAnchorY() const final { return 0; }
     double getAnchorZ() const final { return 0; }
     double getLaserLenght() const final { return 0; }
+    GUI_TYPES::TMSAA getMsaa() const final { return 0; }
 
     void setTranslationX(const double) final { }
     void setTranslationY(const double) final { }
@@ -63,7 +65,10 @@ public:
     void setAnchorY(const double) final { }
     void setAnchorZ(const double) final { }
     void setLaserLenght(const double) final { }
+    void setMsaa(const GUI_TYPES::TMSAA) final { }
 };
+
+
 
 class CEmptyBotSocket : public CAbstractBotSocket
 {
@@ -73,19 +78,27 @@ public:
 protected:
     BotSocket::TSocketError startSocket() final { return BotSocket::ENSE_NO; }
     void stopSocket() final { }
+    BotSocket::TSocketState socketState() const final { return BotSocket ::ENSS_FALL; }
 };
 
+
+
 static const Standard_Integer Z_LAYER = 100;
+
+class CModelMover;
 
 class MainWindowPrivate
 {
     friend class MainWindow;
+    friend class CModelMover;
 
 private:
     MainWindowPrivate() :
         guiSettings(&emptySettings),
         zLayerId(Z_LAYER),
-        botSocket(&emptySocket) { }
+        botSocket(&emptySocket),
+        stateLamp(new QLabel())
+    { }
 
     void init(OpenGl_GraphicDriver &driver) {
         viewer = new V3d_Viewer(&driver);
@@ -117,18 +130,18 @@ private:
         }
 
         gp_Trsf trsf = curModel.Location().Transformation();
-        const gp_Vec translation(guiSettings->getTranslationX(),
-                                 guiSettings->getTranslationY(),
-                                 guiSettings->getTranslationZ());
+        const gp_Vec translation(guiSettings->getTranslationX() + mdlMover.getTrX(),
+                                 guiSettings->getTranslationY() + mdlMover.getTrY(),
+                                 guiSettings->getTranslationZ() + mdlMover.getTrZ());
         const gp_Quaternion quat =
-                gp_Quaternion(gp_Vec(1., 0., 0.), guiSettings->getRotationX() * DEGREE_K) *
-                gp_Quaternion(gp_Vec(0., 1., 0.), guiSettings->getRotationY() * DEGREE_K) *
-                gp_Quaternion(gp_Vec(0., 0., 1.), guiSettings->getRotationZ() * DEGREE_K);
+                gp_Quaternion(gp_Vec(1., 0., 0.), guiSettings->getRotationX() * DEGREE_K + mdlMover.getRX()) *
+                gp_Quaternion(gp_Vec(0., 1., 0.), guiSettings->getRotationY() * DEGREE_K + mdlMover.getRY()) *
+                gp_Quaternion(gp_Vec(0., 0., 1.), guiSettings->getRotationZ() * DEGREE_K + mdlMover.getRZ());
         trsf.SetTransformation(quat, translation);
         curModel.Location(trsf);
         Handle(AIS_Shape) ais_shape = new AIS_Shape(curModel);
-        context->Display(ais_shape, Standard_True);
         context->SetDisplayMode(ais_shape, shading ? 1 : 0, false);
+        context->Display(ais_shape, Standard_True);
 
         viewer->Redraw();
     }
@@ -139,6 +152,15 @@ private:
         return !curModel.IsNull();
     }
 
+    void setMSAA(const GUI_TYPES::TMSAA value, CMainViewport &view) {
+        for(auto pair : mapMsaa) {
+            pair.second->blockSignals(true);
+            pair.second->setChecked(pair.first == value);
+            pair.second->blockSignals(false);
+        }
+        view.setMSAA(value);
+    }
+
 private:
     CEmptyGuiSettings emptySettings;
     CAbstractGuiSettings *guiSettings;
@@ -147,13 +169,18 @@ private:
     Handle(AIS_InteractiveContext) context;
     Standard_Integer zLayerId;
 
-//    NCollection_Vector <Handle(AIS_InteractiveObject)> curModels;
     TopoDS_Shape curModel;
 
     CEmptyBotSocket emptySocket;
     CAbstractBotSocket *botSocket;
 
     CBotCross cross;
+
+    CModelMover mdlMover;
+
+    QLabel * const stateLamp;
+    QAction *startAction, *stopAction;
+    std::map <GUI_TYPES::TMSAA, QAction *> mapMsaa;
 };
 
 
@@ -165,6 +192,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    d_ptr->mdlMover.setGui(this);
+
     //Menu "File"
     connect(ui->actionImport, SIGNAL(triggered(bool)), SLOT(slImport()));
     connect(ui->actionExit, SIGNAL(triggered(bool)), SLOT(slExit()));
@@ -173,6 +202,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionShading, SIGNAL(toggled(bool)), SLOT(slShading(bool)));
     ui->dockSettings->setVisible(false);
     connect(ui->actionCalib, SIGNAL(toggled(bool)), SLOT(slShowCalibWidget(bool)));
+    //MSAA
+    d_ptr->mapMsaa = std::map <GUI_TYPES::TMSAA, QAction *> {
+        { GUI_TYPES::ENMSAA_OFF, ui->actionMSAA_Off },
+        { GUI_TYPES::ENMSAA_2  , ui->actionMSAA_2X  },
+        { GUI_TYPES::ENMSAA_4  , ui->actionMSAA_4X  },
+        { GUI_TYPES::ENMSAA_8  , ui->actionMSAA_8X  }
+    };
+    for(auto pair : d_ptr->mapMsaa)
+        connect(pair.second, SIGNAL(toggled(bool)), SLOT(slMsaa()));
 
     //ToolBar
     ui->toolBar->addAction(QIcon::fromTheme("document-open"),
@@ -185,6 +223,29 @@ MainWindow::MainWindow(QWidget *parent) :
                            ui->actionShading,
                            SLOT(toggle()));
     ui->toolBar->addSeparator();
+    QLabel * const strech = new QLabel(" ", ui->toolBar);
+    strech->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    ui->toolBar->addWidget(strech);
+    d_ptr->startAction = ui->toolBar->addAction(QIcon::fromTheme("media-playback-start"),
+                                                tr("Старт"),
+                                                this,
+                                                SLOT(slStart()));
+    d_ptr->startAction = ui->toolBar->addAction(QIcon::fromTheme("media-playback-stop"),
+                                                tr("Стоп"),
+                                                this,
+                                                SLOT(slStop()));
+    QLabel * const txtState = new QLabel(tr("Соединение: "), ui->toolBar);
+    QFont stateFnt = txtState->font();
+    stateFnt.setPointSize(18);
+    txtState->setFont(stateFnt);
+    txtState->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    ui->toolBar->addWidget(txtState);
+    d_ptr->stateLamp->setParent(ui->toolBar);
+    ui->toolBar->addWidget(d_ptr->stateLamp);
+    const QPixmap red(":/Lamps/Data/Lamps/red.png");
+    d_ptr->stateLamp->setPixmap(red.scaled(ui->toolBar->iconSize(),
+                                           Qt::IgnoreAspectRatio,
+                                           Qt::SmoothTransformation));
 
     //Callib
     connect(ui->pbApplyCalib, SIGNAL(clicked(bool)), SLOT(slCallibApply()));
@@ -218,12 +279,42 @@ void MainWindow::setSettings(CAbstractGuiSettings &settings)
     ui->dsbAnchY->setValue(settings.getAnchorY());
     ui->dsbAnchZ->setValue(settings.getAnchorZ());
     ui->dsbLL->setValue(settings.getLaserLenght());
+
+    d_ptr->setMSAA(settings.getMsaa(), *ui->mainView);
 }
 
-void MainWindow::setBotSocket(CAbstractBotSocket &botSocket)
+void MainWindow::setBotSocket(CAbstractBotSocket &socket)
 {
-    d_ptr->botSocket = &botSocket;
-    d_ptr->botSocket->gui = this;
+    d_ptr->botSocket = &socket;
+    socket.setUi(d_ptr->mdlMover);
+}
+
+void MainWindow::updateMdlTransform()
+{
+    d_ptr->reDrawScene(ui->actionShading->isChecked());
+}
+
+void MainWindow::updateBotSocketState()
+{
+    static const QPixmap red =
+            QPixmap(":/Lamps/Data/Lamps/red.png").scaled(ui->toolBar->iconSize(),
+                                                         Qt::IgnoreAspectRatio,
+                                                         Qt::SmoothTransformation);
+    static const QPixmap green =
+            QPixmap(":/Lamps/Data/Lamps/green.png").scaled(ui->toolBar->iconSize(),
+                                                         Qt::IgnoreAspectRatio,
+                                                         Qt::SmoothTransformation);
+
+    if (d_ptr->mdlMover.socketState() != BotSocket::ENSS_OK)
+    {
+        d_ptr->stateLamp->setPixmap(red);
+        d_ptr->stateLamp->setToolTip(tr("Авария"));
+    }
+    else
+    {
+        d_ptr->stateLamp->setPixmap(green);
+        d_ptr->stateLamp->setToolTip(tr("OK"));
+    }
 }
 
 void MainWindow::slImport()
@@ -263,6 +354,21 @@ void MainWindow::slShowCalibWidget(bool enabled)
     ui->dockSettings->setVisible(enabled);
 }
 
+void MainWindow::slMsaa()
+{
+    GUI_TYPES::TMSAA msaa = GUI_TYPES::ENMSAA_OFF;
+    for(auto pair : d_ptr->mapMsaa)
+    {
+        if (pair.second == sender())
+        {
+            msaa = pair.first;
+            break;
+        }
+    }
+    d_ptr->setMSAA(msaa, *ui->mainView);
+    d_ptr->guiSettings->setMsaa(msaa);
+}
+
 void MainWindow::slCallibApply()
 {
     d_ptr->guiSettings->setTranslationX(ui->dsbTrX->value());
@@ -280,5 +386,17 @@ void MainWindow::slCallibApply()
     d_ptr->guiSettings->setLaserLenght(ui->dsbLL->value());
 
     d_ptr->reDrawScene(ui->actionShading->isChecked());
+}
+
+void MainWindow::slStart()
+{
+    d_ptr->context->SetAutomaticHilight(Standard_False);
+    d_ptr->botSocket->start();
+}
+
+void MainWindow::slStop()
+{
+    d_ptr->botSocket->stop();
+    d_ptr->context->SetAutomaticHilight(Standard_True);
 }
 

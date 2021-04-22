@@ -13,6 +13,12 @@
   <property name="windowTitle">
    <string>LaserBotGui</string>
   </property>
+  <property name="iconSize">
+   <size>
+    <width>48</width>
+    <height>48</height>
+   </size>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
@@ -42,13 +48,25 @@
     <property name="title">
      <string>Вид</string>
     </property>
+    <widget class="QMenu" name="menuMSAA">
+     <property name="title">
+      <string>MSAA</string>
+     </property>
+     <addaction name="actionMSAA_Off"/>
+     <addaction name="actionMSAA_2X"/>
+     <addaction name="actionMSAA_4X"/>
+     <addaction name="actionMSAA_8X"/>
+    </widget>
     <addaction name="actionShading"/>
+    <addaction name="menuMSAA"/>
+    <addaction name="separator"/>
     <addaction name="actionCalib"/>
    </widget>
    <widget class="QMenu" name="menu_2">
     <property name="title">
      <string>Справка</string>
     </property>
+    <addaction name="action_3"/>
     <addaction name="action"/>
    </widget>
    <addaction name="menuFile"/>
@@ -56,17 +74,6 @@
    <addaction name="menu_2"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <widget class="QToolBar" name="toolBar">
-   <property name="windowTitle">
-    <string>toolBar</string>
-   </property>
-   <attribute name="toolBarArea">
-    <enum>TopToolBarArea</enum>
-   </attribute>
-   <attribute name="toolBarBreak">
-    <bool>false</bool>
-   </attribute>
-  </widget>
   <widget class="QDockWidget" name="dockSettings">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -473,7 +480,7 @@
    <widget class="QWidget" name="dockWidgetContents_3">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QTextEdit" name="textEdit">
+      <widget class="QTextEdit" name="teJrnl">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -484,6 +491,23 @@
      </item>
     </layout>
    </widget>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="floatable">
+    <bool>false</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
   </widget>
   <action name="actionImport">
    <property name="text">
@@ -527,6 +551,43 @@
    </property>
    <property name="text">
     <string>Калибровка</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>Помощь</string>
+   </property>
+  </action>
+  <action name="actionMSAA_Off">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Откл</string>
+   </property>
+  </action>
+  <action name="actionMSAA_2X">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MSAA 2X</string>
+   </property>
+  </action>
+  <action name="actionMSAA_4X">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MSAA 4X</string>
+   </property>
+  </action>
+  <action name="actionMSAA_8X">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>MSAA 8X</string>
    </property>
   </action>
  </widget>
