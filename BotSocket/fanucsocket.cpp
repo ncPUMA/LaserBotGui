@@ -80,7 +80,6 @@ void FanucSocket::on_error(QAbstractSocket::SocketError error)
 void FanucSocket::on_readyread()
 {
     struct statepos s;
-
     while(socket_.bytesAvailable() >= (qint64)sizeof(s))
     {
         size_t bytes_read = socket_.read(reinterpret_cast<char*>(&s), sizeof(s));
@@ -97,17 +96,17 @@ void FanucSocket::on_readyread()
 //                     s.u.x, s.u.y, s.u.z, s.u.w, s.u.p, s.u.r, s.u.config,
 //                     s.w.x, s.w.y, s.w.z, s.w.w, s.w.p, s.w.r, s.w.config,
 //                     s.j.j[0], s.j.j[1], s.j.j[2], s.j.j[3], s.j.j[4], s.j.j[5], s.j.j[6], s.j.j[7], s.j.j[8]);
-
-        FanucSocket::position pos{s.w.x - offset_.x,
-                                  s.w.y - offset_.y,
-                                  s.w.z - offset_.z,
-                                  s.w.w - offset_.w,
-                                  s.w.p - offset_.p,
-                                  s.w.r - offset_.r};
-        qDebug("Pos: t=%f pos=(%f, %f, %f, %f, %f, %f)\n",
-               ((double)s.time)/1e6, pos.x, pos.y, pos.z, pos.w, pos.p, pos.r);
-        emit position_received(pos);
     }
+    //send last one
+    FanucSocket::position pos{s.w.x - offset_.x,
+                              s.w.y - offset_.y,
+                              s.w.z - offset_.z,
+                              s.w.w - offset_.w,
+                              s.w.p - offset_.p,
+                              s.w.r - offset_.r};
+    qDebug("{%f, %f, %f, %f, %f, %f, %f},",
+           ((double)s.time)/1e6, pos.x, pos.y, pos.z, pos.w, pos.p, pos.r);
+    emit position_received(pos);
 }
 
 void FanucSocket::start_connection()
