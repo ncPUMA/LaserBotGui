@@ -37,7 +37,7 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>Файл</string>
+     <string>&amp;Файл</string>
     </property>
     <addaction name="separator"/>
     <addaction name="actionImport"/>
@@ -46,7 +46,7 @@
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>Вид</string>
+     <string>&amp;Вид</string>
     </property>
     <widget class="QMenu" name="menuMSAA">
      <property name="title">
@@ -63,16 +63,16 @@
     <addaction name="separator"/>
     <addaction name="actionCalib"/>
    </widget>
-   <widget class="QMenu" name="menu_2">
+   <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Справка</string>
+     <string>Справ&amp;ка</string>
     </property>
-    <addaction name="action_3"/>
-    <addaction name="action"/>
+    <addaction name="actionHelp"/>
+    <addaction name="actionAbout"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
-   <addaction name="menu_2"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="dockSettings">
@@ -549,7 +549,7 @@ p, li { white-space: pre-wrap; }
     <string>Сброс</string>
    </property>
   </action>
-  <action name="action">
+  <action name="actionAbout">
    <property name="text">
     <string>О Программе</string>
    </property>
@@ -573,7 +573,7 @@ p, li { white-space: pre-wrap; }
     <string>Калибровка</string>
    </property>
   </action>
-  <action name="action_3">
+  <action name="actionHelp">
    <property name="text">
     <string>Помощь</string>
    </property>

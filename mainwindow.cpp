@@ -267,7 +267,7 @@ MainWindow::MainWindow(QWidget *parent) :
                            tr("Счетчик FPS"),
                            ui->actionFPS,
                            SLOT(toggle()));
-    ui->toolBar->addSeparator();
+//    ui->toolBar->addSeparator();
     QLabel * const strech = new QLabel(" ", ui->toolBar);
     strech->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     ui->toolBar->addWidget(strech);
