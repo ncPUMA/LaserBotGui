@@ -22,6 +22,7 @@ SOURCES += \
     ModelLoader/csteploader.cpp \
     ModelLoader/cstlloader.cpp \
     Primitives/cbotcross.cpp \
+    Primitives/claservec.cpp \
     caspectwindow.cpp \
     cmainsettings.cpp \
     cmainviewport.cpp \
@@ -47,6 +48,7 @@ HEADERS += \
     ModelLoader/csteploader.h \
     ModelLoader/cstlloader.h \
     Primitives/cbotcross.h \
+    Primitives/claservec.h \
     cabstractguisettings.h \
     caspectwindow.h \
     cmainsettings.h \

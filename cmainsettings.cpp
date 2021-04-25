@@ -26,7 +26,10 @@ enum EN_GuiKeys
     ENGK_ANCH_X,
     ENGK_ANCH_Y,
     ENGK_ANCH_Z,
-    ENGK_LL,
+    ENGK_LX,
+    ENGK_LY,
+    ENGK_LZ,
+    ENGK_SC,
     ENGK_MSAA,
 
     ENGK_LAST
@@ -46,7 +49,10 @@ static const std::map <TGuiKey, QString> guiKeyMap = {
     { ENGK_ANCH_X, "anch_x"  },
     { ENGK_ANCH_Y, "anch_y"  },
     { ENGK_ANCH_Z, "anch_z"  },
-    { ENGK_LL    , "l_laser" },
+    { ENGK_LX    , "laser_x" },
+    { ENGK_LY    , "laser_y" },
+    { ENGK_LZ    , "laser_z" },
+    { ENGK_SC    , "sc"      },
     { ENGK_MSAA  , "msaa"    }
 };
 
@@ -90,7 +96,10 @@ public:
     double getAnchorX() const final { return readGuiValue(ENGK_ANCH_X); }
     double getAnchorY() const final { return readGuiValue(ENGK_ANCH_Y); }
     double getAnchorZ() const final { return readGuiValue(ENGK_ANCH_Z); }
-    double getLaserLenght() const final { return readGuiValue(ENGK_LL); }
+    double getLaserX() const final { return readGuiValue(ENGK_LX); }
+    double getLaserY() const final { return readGuiValue(ENGK_LY); }
+    double getLaserZ() const final { return readGuiValue(ENGK_LZ); }
+    double getScale() const final { return readGuiValue(ENGK_SC); }
     GUI_TYPES::TMSAA getMsaa() const final { return static_cast <GUI_TYPES::TMSAA> (readGuiValue(ENGK_MSAA)); }
 
     void setTranslationX(const double value) final { writeGuiValue(ENGK_TR_X, value); }
@@ -105,7 +114,10 @@ public:
     void setAnchorX(const double value) final { writeGuiValue(ENGK_ANCH_X, value); }
     void setAnchorY(const double value) final { writeGuiValue(ENGK_ANCH_Y, value); }
     void setAnchorZ(const double value) final { writeGuiValue(ENGK_ANCH_Z, value); }
-    void setLaserLenght(const double value) final { writeGuiValue(ENGK_LL, value); }
+    void setLaserX(const double value) final { writeGuiValue(ENGK_LX, value); }
+    void setLaserY(const double value) final { writeGuiValue(ENGK_LY, value); }
+    void setLaserZ(const double value) final { writeGuiValue(ENGK_LZ, value); }
+    void setScale(const double value) final { writeGuiValue(ENGK_SC, value); }
     void setMsaa(const GUI_TYPES::TMSAA value) final { writeGuiValue(ENGK_MSAA, value); }
 
     //CAbstractBotSocketSettings

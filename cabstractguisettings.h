@@ -21,7 +21,10 @@ public:
     virtual double getAnchorX() const = 0;
     virtual double getAnchorY() const = 0;
     virtual double getAnchorZ() const = 0;
-    virtual double getLaserLenght() const = 0;
+    virtual double getLaserX() const = 0;
+    virtual double getLaserY() const = 0;
+    virtual double getLaserZ() const = 0;
+    virtual double getScale() const = 0;
     virtual GUI_TYPES::TMSAA getMsaa() const = 0;
 
     virtual void setTranslationX(const double value) = 0;
@@ -36,7 +39,10 @@ public:
     virtual void setAnchorX(const double value) = 0;
     virtual void setAnchorY(const double value) = 0;
     virtual void setAnchorZ(const double value) = 0;
-    virtual void setLaserLenght(const double value) = 0;
+    virtual void setLaserX(const double value) = 0;
+    virtual void setLaserY(const double value) = 0;
+    virtual void setLaserZ(const double value) = 0;
+    virtual void setScale(const double value) = 0;
     virtual void setMsaa(const GUI_TYPES::TMSAA value) = 0;
 };
 

@@ -18,6 +18,8 @@
 #include <AIS_TextLabel.hxx>
 #include <Graphic3d_ZLayerSettings.hxx>
 #include <BRepBuilderAPI_GTransform.hxx>
+#include <AIS_ViewCube.hxx>
+#include <IntCurvesFace_ShapeIntersector.hxx>
 
 #include "ModelLoader/cmodelloaderfactorymethod.h"
 #include "ModelLoader/cabstractmodelloader.h"
@@ -28,6 +30,7 @@
 #include "cmodelmover.h"
 
 #include "Primitives/cbotcross.h"
+#include "Primitives/claservec.h"
 
 #include "cabstractguisettings.h"
 
@@ -50,7 +53,10 @@ public:
     double getAnchorX() const final { return 0; }
     double getAnchorY() const final { return 0; }
     double getAnchorZ() const final { return 0; }
-    double getLaserLenght() const final { return 0; }
+    double getLaserX() const final { return 0; }
+    double getLaserY() const final { return 0; }
+    double getLaserZ() const final { return 0; }
+    double getScale() const final { return 0; }
     GUI_TYPES::TMSAA getMsaa() const final { return 0; }
 
     void setTranslationX(const double) final { }
@@ -65,7 +71,10 @@ public:
     void setAnchorX(const double) final { }
     void setAnchorY(const double) final { }
     void setAnchorZ(const double) final { }
-    void setLaserLenght(const double) final { }
+    void setLaserX(const double) final { }
+    void setLaserY(const double) final { }
+    void setLaserZ(const double) final { }
+    void setScale(const double) final { }
     void setMsaa(const GUI_TYPES::TMSAA) final { }
 };
 
@@ -121,8 +130,8 @@ private:
     void reDrawScene(const bool shading) {
         context->RemoveAll(Standard_False);
 
-        const QString botTxt = QString("Coord:\n   X: %1\n   Y: %2\n   Z: %3\n"
-                                       "Ang:\n   α: %4\n   β: %5\n   γ: %6")
+        const QString botTxt = MainWindow::tr("Смешение:\n   X: %1\n   Y: %2\n   Z: %3\n"
+                                              "Наклон:\n   α: %4\n   β: %5\n   γ: %6")
                 .arg(mdlMover.getTrX(), 11, 'f', 6, QChar('0'))
                 .arg(mdlMover.getTrY(), 11, 'f', 6, QChar('0'))
                 .arg(mdlMover.getTrZ(), 11, 'f', 6, QChar('0'))
@@ -135,7 +144,7 @@ private:
             it.More(); it.Next()) {
             const Handle(AIS_InteractiveObject)& obj = it.Value();
             context->Display(obj, Standard_False);
-            context->SetDisplayMode(obj, shading ? 1 : 0, false);
+            context->SetDisplayMode(obj, shading ? 1 : 0, Standard_False);
             context->SetZLayer(obj, zLayerId);
         }
 
@@ -158,10 +167,53 @@ private:
         trsfRZ.SetRotation(gp_Ax1(anchor, gp_Dir(0.,0.,1.)),
                            guiSettings->getRotationZ() * DEGREE_K + mdlMover.getRZ() * DEGREE_K);
 
-        curModel.Location(trsfTr * trsfRX * trsfRY * trsfRZ);
+        //scale
+        gp_Trsf trsfSc = curModel.Location().Transformation();
+        double scaleFactor = guiSettings->getScale();
+        if (scaleFactor == 0.)
+            scaleFactor = 1.;
+        trsfSc.SetScale(anchor, scaleFactor);
+
+        curModel.Location(trsfTr * trsfRX * trsfRY * trsfRZ * trsfSc);
         Handle(AIS_Shape) ais_shape = new AIS_Shape(curModel);
-        context->SetDisplayMode(ais_shape, shading ? 1 : 0, false);
+        context->SetDisplayMode(ais_shape, shading ? 1 : 0, Standard_False);
         context->Display(ais_shape, Standard_False);
+
+        gp_Pnt aPnt1(0., 0., 0.);
+        gp_Pnt aPnt2(guiSettings->getLaserX(), guiSettings->getLaserY(), guiSettings->getLaserZ());
+        if (!aPnt1.IsEqual(aPnt2, gp::Resolution()))
+        {
+            gp_Vec aVec(aPnt1, aPnt2);
+
+            IntCurvesFace_ShapeIntersector intersector;
+            intersector.Load(curModel, Precision::Confusion());
+            const gp_Lin lin = gp_Lin(aPnt1, gp_Dir(aVec));
+            intersector.PerformNearest(lin, 0, RealLast());
+            if (intersector.IsDone() && intersector.NbPnt() > 0)
+            {
+                gp_Pnt aPnt3 = intersector.Pnt(1);
+                if (!aPnt1.IsEqual(aPnt3, gp::Resolution()))
+                    aVec = gp_Vec(aPnt1, aPnt3);
+            }
+
+            Handle(CLaserVec) lVec = new CLaserVec(aPnt1, aVec, 0.5);
+            context->SetDisplayMode(lVec, 1, Standard_False);
+            context->Display(lVec, Standard_False);
+        }
+
+        Handle(AIS_ViewCube) aViewCube = new AIS_ViewCube();
+        aViewCube->SetDrawEdges(Standard_False);
+        aViewCube->SetDrawVertices(Standard_False);
+        aViewCube->SetBoxTransparency(1.);
+        TCollection_AsciiString emptyStr;
+        aViewCube->SetBoxSideLabel(V3d_Xpos, emptyStr);
+        aViewCube->SetBoxSideLabel(V3d_Ypos, emptyStr);
+        aViewCube->SetBoxSideLabel(V3d_Zpos, emptyStr);
+        aViewCube->SetBoxSideLabel(V3d_Xneg, emptyStr);
+        aViewCube->SetBoxSideLabel(V3d_Yneg, emptyStr);
+        aViewCube->SetBoxSideLabel(V3d_Zneg, emptyStr);
+        context->SetDisplayMode(aViewCube, 1, Standard_False);
+        context->Display(aViewCube, Standard_False);
 
         viewer->Redraw();
     }
@@ -324,7 +376,10 @@ void MainWindow::setSettings(CAbstractGuiSettings &settings)
     ui->dsbAnchX->setValue(settings.getAnchorX());
     ui->dsbAnchY->setValue(settings.getAnchorY());
     ui->dsbAnchZ->setValue(settings.getAnchorZ());
-    ui->dsbLL->setValue(settings.getLaserLenght());
+    ui->dsbLaserX->setValue(settings.getLaserX());
+    ui->dsbLaserY->setValue(settings.getLaserY());
+    ui->dsbLaserZ->setValue(settings.getLaserZ());
+    ui->dsbScale->setValue(settings.getScale());
 
     d_ptr->setMSAA(settings.getMsaa(), *ui->mainView);
 }
@@ -337,8 +392,8 @@ void MainWindow::setBotSocket(CAbstractBotSocket &socket)
 
 void MainWindow::updateMdlTransform()
 {
-    QTime t;
-    t.start();
+//    QTime t;
+//    t.start();
     const QString botTxt = QString("%1\t-->\tx: %2 y: %3 z: %4 "
                                    "α: %5 β: %6 γ: %7")
             .arg(QTime::currentTime().toString("hh:mm:ss.zzz"))
@@ -350,7 +405,7 @@ void MainWindow::updateMdlTransform()
             .arg(d_ptr->mdlMover.getRZ() , 11, 'f', 6, QChar('0'));
     ui->teJrnl->append(botTxt);
     d_ptr->reDrawScene(ui->actionShading->isChecked());
-    qDebug() << t.elapsed();
+//    qDebug() << t.elapsed();
 }
 
 void MainWindow::updateBotSocketState()
@@ -452,7 +507,10 @@ void MainWindow::slCallibApply()
     d_ptr->guiSettings->setAnchorX(ui->dsbAnchX->value());
     d_ptr->guiSettings->setAnchorY(ui->dsbAnchY->value());
     d_ptr->guiSettings->setAnchorZ(ui->dsbAnchZ->value());
-    d_ptr->guiSettings->setLaserLenght(ui->dsbLL->value());
+    d_ptr->guiSettings->setLaserX(ui->dsbLaserX->value());
+    d_ptr->guiSettings->setLaserY(ui->dsbLaserY->value());
+    d_ptr->guiSettings->setLaserZ(ui->dsbLaserZ->value());
+    d_ptr->guiSettings->setScale(ui->dsbScale->value());
 
 //    d_ptr->curModel = d_ptr->affinityTransform(d_ptr->curModel);
 
