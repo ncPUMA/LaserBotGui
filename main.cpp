@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QApplication>
+#include <QFile>
 
 #include <OpenGl_GraphicDriver.hxx>
 #include <OSD_Environment.hxx>
@@ -54,6 +55,13 @@ int main(int argc, char *argv[])
         botSocket = new CFanucBotSocket();
     botSocket->setSettings(settings.socketSettings());
     w.setBotSocket(*botSocket);
+    QFile f(":/Styles/Data/StyleSheets/style.qss");
+    if (f.open(QIODevice::ReadOnly))
+    {
+        const QString str = QString(f.readAll());
+        w.setStyleSheet(str);
+        f.close();
+    }
     w.show();
     const int retCode = a.exec();
     delete botSocket;

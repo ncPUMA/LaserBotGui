@@ -251,12 +251,12 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(pair.second, SIGNAL(toggled(bool)), SLOT(slMsaa()));
 
     //ToolBar
-    ui->toolBar->addAction(QIcon::fromTheme("document-open"),
+    ui->toolBar->addAction(QIcon::fromTheme(":/icons/Data/Icons/open.png"),
                            tr("Импорт..."),
                            ui->actionImport,
                            SLOT(trigger()));
     ui->toolBar->addSeparator();
-    ui->toolBar->addAction(QIcon::fromTheme("format-justify-fill"),
+    ui->toolBar->addAction(QIcon::fromTheme(":/icons/Data/Icons/shading.png"),
                            tr("Shading"),
                            ui->actionShading,
                            SLOT(toggle()));
@@ -264,11 +264,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QLabel * const strech = new QLabel(" ", ui->toolBar);
     strech->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     ui->toolBar->addWidget(strech);
-    d_ptr->startAction = ui->toolBar->addAction(QIcon::fromTheme("media-playback-start"),
+    d_ptr->startAction = ui->toolBar->addAction(QIcon::fromTheme(":/icons/Data/Icons/play.png"),
                                                 tr("Старт"),
                                                 this,
                                                 SLOT(slStart()));
-    d_ptr->startAction = ui->toolBar->addAction(QIcon::fromTheme("media-playback-stop"),
+    d_ptr->startAction = ui->toolBar->addAction(QIcon::fromTheme(":/icons/Data/Icons/pause.png"),
                                                 tr("Стоп"),
                                                 this,
                                                 SLOT(slStop()));

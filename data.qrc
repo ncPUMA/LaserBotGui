@@ -3,4 +3,13 @@
         <file>Data/Lamps/green.png</file>
         <file>Data/Lamps/red.png</file>
     </qresource>
+    <qresource prefix="/icons">
+        <file>Data/Icons/open.png</file>
+        <file>Data/Icons/pause.png</file>
+        <file>Data/Icons/play.png</file>
+        <file>Data/Icons/shading.png</file>
+    </qresource>
+    <qresource prefix="/Styles">
+        <file>Data/StyleSheets/style.qss</file>
+    </qresource>
 </RCC>

@@ -76,9 +76,14 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
     .gitignore \
+    Data/Icons/open.png \
+    Data/Icons/pause.png \
+    Data/Icons/play.png \
+    Data/Icons/shading.png \
     Data/Lamps/green.png \
     Data/Lamps/red.png \
     Data/Models/plate.stp \
+    Data/StyleSheets/style.qss \
     LICENSE \
     README.md
 
