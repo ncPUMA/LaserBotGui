@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QTime>
 
 #include <OpenGl_GraphicDriver.hxx>
 #include <V3d_Viewer.hxx>
@@ -121,13 +122,13 @@ private:
         context->RemoveAll(Standard_False);
 
         const QString botTxt = QString("Coord:\n   X: %1\n   Y: %2\n   Z: %3\n"
-                                       "Ang:\n   X: %4\n   Y: %5\n   Z: %6")
-                .arg(mdlMover.getTrX(), 10, 'f', 6, QChar('0'))
-                .arg(mdlMover.getTrY(), 10, 'f', 6, QChar('0'))
-                .arg(mdlMover.getTrZ(), 10, 'f', 6, QChar('0'))
-                .arg(mdlMover.getRX() , 10, 'f', 6, QChar('0'))
-                .arg(mdlMover.getRY() , 10, 'f', 6, QChar('0'))
-                .arg(mdlMover.getRZ() , 10, 'f', 6, QChar('0'));
+                                       "Ang:\n   α: %4\n   β: %5\n   γ: %6")
+                .arg(mdlMover.getTrX(), 11, 'f', 6, QChar('0'))
+                .arg(mdlMover.getTrY(), 11, 'f', 6, QChar('0'))
+                .arg(mdlMover.getTrZ(), 11, 'f', 6, QChar('0'))
+                .arg(mdlMover.getRX() , 11, 'f', 6, QChar('0'))
+                .arg(mdlMover.getRY() , 11, 'f', 6, QChar('0'))
+                .arg(mdlMover.getRZ() , 11, 'f', 6, QChar('0'));
         NCollection_Vector <Handle(AIS_InteractiveObject)> crossObj =
                 cross.objects(botTxt.toLocal8Bit().constData());
         for(NCollection_Vector <Handle(AIS_InteractiveObject)>::Iterator it(crossObj);
@@ -160,7 +161,7 @@ private:
         curModel.Location(trsfTr * trsfRX * trsfRY * trsfRZ);
         Handle(AIS_Shape) ais_shape = new AIS_Shape(curModel);
         context->SetDisplayMode(ais_shape, shading ? 1 : 0, false);
-        context->Display(ais_shape, Standard_True);
+        context->Display(ais_shape, Standard_False);
 
         viewer->Redraw();
     }
@@ -249,26 +250,32 @@ MainWindow::MainWindow(QWidget *parent) :
     };
     for(auto pair : d_ptr->mapMsaa)
         connect(pair.second, SIGNAL(toggled(bool)), SLOT(slMsaa()));
+    //FPS
+    connect(ui->actionFPS, SIGNAL(toggled(bool)), SLOT(slFpsCounter(bool)));
 
     //ToolBar
-    ui->toolBar->addAction(QIcon::fromTheme(":/icons/Data/Icons/open.png"),
+    ui->toolBar->addAction(QIcon(":/icons/Data/Icons/open.png"),
                            tr("Импорт..."),
                            ui->actionImport,
                            SLOT(trigger()));
     ui->toolBar->addSeparator();
-    ui->toolBar->addAction(QIcon::fromTheme(":/icons/Data/Icons/shading.png"),
+    ui->toolBar->addAction(QIcon(":/icons/Data/Icons/shading.png"),
                            tr("Shading"),
                            ui->actionShading,
+                           SLOT(toggle()));
+    ui->toolBar->addAction(QIcon(":/icons/Data/Icons/fps-counter.png"),
+                           tr("Счетчик FPS"),
+                           ui->actionFPS,
                            SLOT(toggle()));
     ui->toolBar->addSeparator();
     QLabel * const strech = new QLabel(" ", ui->toolBar);
     strech->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     ui->toolBar->addWidget(strech);
-    d_ptr->startAction = ui->toolBar->addAction(QIcon::fromTheme(":/icons/Data/Icons/play.png"),
+    d_ptr->startAction = ui->toolBar->addAction(QIcon(":/icons/Data/Icons/play.png"),
                                                 tr("Старт"),
                                                 this,
                                                 SLOT(slStart()));
-    d_ptr->startAction = ui->toolBar->addAction(QIcon::fromTheme(":/icons/Data/Icons/pause.png"),
+    d_ptr->startAction = ui->toolBar->addAction(QIcon(":/icons/Data/Icons/pause.png"),
                                                 tr("Стоп"),
                                                 this,
                                                 SLOT(slStop()));
@@ -299,6 +306,7 @@ void MainWindow::init(OpenGl_GraphicDriver &driver)
 {
     d_ptr->init(driver);
     ui->mainView->init(*d_ptr->context);
+    ui->mainView->setStatsVisible(ui->actionFPS->isChecked());
 }
 
 void MainWindow::setSettings(CAbstractGuiSettings &settings)
@@ -329,7 +337,20 @@ void MainWindow::setBotSocket(CAbstractBotSocket &socket)
 
 void MainWindow::updateMdlTransform()
 {
+    QTime t;
+    t.start();
+    const QString botTxt = QString("%1\t-->\tx: %2 y: %3 z: %4 "
+                                   "α: %5 β: %6 γ: %7")
+            .arg(QTime::currentTime().toString("hh:mm:ss.zzz"))
+            .arg(d_ptr->mdlMover.getTrX(), 11, 'f', 6, QChar('0'))
+            .arg(d_ptr->mdlMover.getTrY(), 11, 'f', 6, QChar('0'))
+            .arg(d_ptr->mdlMover.getTrZ(), 11, 'f', 6, QChar('0'))
+            .arg(d_ptr->mdlMover.getRX() , 11, 'f', 6, QChar('0'))
+            .arg(d_ptr->mdlMover.getRY() , 11, 'f', 6, QChar('0'))
+            .arg(d_ptr->mdlMover.getRZ() , 11, 'f', 6, QChar('0'));
+    ui->teJrnl->append(botTxt);
     d_ptr->reDrawScene(ui->actionShading->isChecked());
+    qDebug() << t.elapsed();
 }
 
 void MainWindow::updateBotSocketState()
@@ -359,6 +380,9 @@ void MainWindow::slImport()
 {
     CModelLoaderFactoryMethod factory;
     QString selectedFilter;
+    const bool socketStarted = d_ptr->botSocket->isStarted();
+    if (socketStarted)
+            d_ptr->botSocket->stop();
     const QString fName =
             QFileDialog::getOpenFileName(this,
                                          tr("Выбор файла"),
@@ -375,6 +399,8 @@ void MainWindow::slImport()
                                   tr("Ошибка загрузки файла"),
                                   tr("Ошибка загрузки файла"));
     }
+    if (socketStarted)
+        d_ptr->botSocket->start();
 }
 
 void MainWindow::slExit()
@@ -405,6 +431,11 @@ void MainWindow::slMsaa()
     }
     d_ptr->setMSAA(msaa, *ui->mainView);
     d_ptr->guiSettings->setMsaa(msaa);
+}
+
+void MainWindow::slFpsCounter(bool enabled)
+{
+    ui->mainView->setStatsVisible(enabled);
 }
 
 void MainWindow::slCallibApply()

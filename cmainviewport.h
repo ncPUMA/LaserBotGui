@@ -18,6 +18,7 @@ public:
     void init(AIS_InteractiveContext &context);
 
     void setMSAA(const GUI_TYPES::TMSAA msaa);
+    void setStatsVisible(const bool value);
     void fitInView();
 
 protected:

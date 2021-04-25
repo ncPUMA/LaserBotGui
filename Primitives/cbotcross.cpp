@@ -41,7 +41,7 @@ NCollection_Vector<Handle (AIS_InteractiveObject)> CBotCross::objects(const char
 {
     NCollection_Vector<Handle (AIS_InteractiveObject)> result;
     result.Append(d_ptr->point);
-    d_ptr->txtCoord->SetText(text);
+    d_ptr->txtCoord->SetText(TCollection_ExtendedString(text, Standard_True));
     result.Append(d_ptr->txtCoord);
     return result;
 }

@@ -16,11 +16,14 @@ int main(int argc, char *argv[])
 {
     //arg parsing
     bool bImitator = false;
+    bool bStyleSheet = true;
     for(int i = 0; i < argc; ++i)
     {
         const char *arg = argv[i];
         if (strcmp(arg, "--imitator") == 0)
             bImitator = true;
+        else if (strcmp(arg, "--no-ssheet") == 0)
+            bStyleSheet = false;
     }
 
     QApplication a(argc, argv);
@@ -55,12 +58,15 @@ int main(int argc, char *argv[])
         botSocket = new CFanucBotSocket();
     botSocket->setSettings(settings.socketSettings());
     w.setBotSocket(*botSocket);
-    QFile f(":/Styles/Data/StyleSheets/style.qss");
-    if (f.open(QIODevice::ReadOnly))
+    if (bStyleSheet)
     {
-        const QString str = QString(f.readAll());
-        w.setStyleSheet(str);
-        f.close();
+        QFile f(":/Styles/Data/StyleSheets/style.qss");
+        if (f.open(QIODevice::ReadOnly))
+        {
+            const QString str = QString(f.readAll());
+            w.setStyleSheet(str);
+            f.close();
+        }
     }
     w.show();
     const int retCode = a.exec();

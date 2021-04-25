@@ -24,6 +24,7 @@ public:
 
     BotSocket::TSocketError start();
     void stop();
+    bool isStarted() const;
 
     BotSocket::TSocketState state() const;
 

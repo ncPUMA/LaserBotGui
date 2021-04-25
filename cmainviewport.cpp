@@ -11,10 +11,6 @@
 
 #include <TopoDS_Shape.hxx>
 
-//#include <SelectMgr_EntityOwner.hxx>
-//#include <StdSelect_BRepOwner.hxx>
-//#include <BRepBuilderAPI_Transform.hxx>
-
 #include "caspectwindow.h"
 
 class CMainViewportPrivate : public AIS_ViewController
@@ -44,7 +40,6 @@ class CMainViewportPrivate : public AIS_ViewController
         SetAllowRotation(Standard_True);
 
         v3dView->ChangeRenderingParams().IsAntialiasingEnabled = Standard_True;
-        v3dView->ChangeRenderingParams().ToShowStats = Standard_True;
 
         v3dView->MustBeResized();
 
@@ -105,6 +100,11 @@ void CMainViewport::setMSAA(const GUI_TYPES::TMSAA msaa)
 
     d_ptr->v3dView->ChangeRenderingParams().NbMsaaSamples = msaa;
     d_ptr->v3dView->Redraw();
+}
+
+void CMainViewport::setStatsVisible(const bool value)
+{
+    d_ptr->v3dView->ChangeRenderingParams().ToShowStats = value;
 }
 
 void CMainViewport::fitInView()

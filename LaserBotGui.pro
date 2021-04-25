@@ -76,6 +76,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 DISTFILES += \
     .gitignore \
+    Data/Icons/fps-counter.png \
     Data/Icons/open.png \
     Data/Icons/pause.png \
     Data/Icons/play.png \

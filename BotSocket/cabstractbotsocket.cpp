@@ -42,10 +42,12 @@ class CAbstractBotSocketPrivate
 
     CAbstractBotSocketPrivate() :
         gui(&emptyUi),
-        settings(&emptySettings) { }
+        settings(&emptySettings),
+        started(false) { }
 
     CAbstractUi *gui;
     CAbstractBotSocketSettings *settings;
+    bool started;
 };
 
 
@@ -110,12 +112,20 @@ void CAbstractBotSocket::setUi(CAbstractUi &gui)
 
 TSocketError CAbstractBotSocket::start()
 {
-    return startSocket();
+    TSocketError result = startSocket();
+    d_ptr->started = (result == ENSE_NO);
+    return result;
 }
 
 void CAbstractBotSocket::stop()
 {
     stopSocket();
+    d_ptr->started = false;
+}
+
+bool CAbstractBotSocket::isStarted() const
+{
+    return d_ptr->started;
 }
 
 TSocketState CAbstractBotSocket::state() const

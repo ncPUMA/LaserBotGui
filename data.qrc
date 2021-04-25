@@ -8,6 +8,7 @@
         <file>Data/Icons/pause.png</file>
         <file>Data/Icons/play.png</file>
         <file>Data/Icons/shading.png</file>
+        <file>Data/Icons/fps-counter.png</file>
     </qresource>
     <qresource prefix="/Styles">
         <file>Data/StyleSheets/style.qss</file>
