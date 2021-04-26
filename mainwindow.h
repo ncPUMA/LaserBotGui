@@ -41,6 +41,7 @@ private slots:
     void slShowCalibWidget(bool enabled);
     void slMsaa();
     void slFpsCounter(bool enabled);
+    void slClearJrnl();
 
     //callib
     void slCallibApply();

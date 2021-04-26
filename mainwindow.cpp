@@ -349,7 +349,9 @@ void MainWindow::updateMdlTransform()
             .arg(d_ptr->mdlMover.getRY() , 11, 'f', 6, QChar('0'))
             .arg(d_ptr->mdlMover.getRZ() , 11, 'f', 6, QChar('0'));
     ui->teJrnl->append(botTxt);
-    d_ptr->reDrawScene(ui->actionShading->isChecked());
+
+    if (d_ptr->botSocket->isStarted() && d_ptr->botSocket->state() == BotSocket::ENSS_ATTACHED)
+        d_ptr->reDrawScene(ui->actionShading->isChecked());
 //    qDebug() << t.elapsed();
 }
 
@@ -456,6 +458,11 @@ void MainWindow::slFpsCounter(bool enabled)
     ui->mainView->setStatsVisible(enabled);
 }
 
+void MainWindow::slClearJrnl()
+{
+    ui->teJrnl->clear();
+}
+
 void MainWindow::slCallibApply()
 {
     d_ptr->guiSettings->setTranslationX(ui->dsbTrX->value());
@@ -513,6 +520,9 @@ void MainWindow::configMenu()
         connect(pair.second, SIGNAL(toggled(bool)), SLOT(slMsaa()));
     //FPS
     connect(ui->actionFPS, SIGNAL(toggled(bool)), SLOT(slFpsCounter(bool)));
+
+    //teJrnl
+    connect(ui->actionClearJrnl, SIGNAL(triggered(bool)), SLOT(slClearJrnl()));
 }
 
 void MainWindow::configToolBar()

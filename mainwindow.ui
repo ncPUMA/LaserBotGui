@@ -61,6 +61,7 @@
     <addaction name="menuMSAA"/>
     <addaction name="actionFPS"/>
     <addaction name="separator"/>
+    <addaction name="actionClearJrnl"/>
     <addaction name="actionCalib"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -683,6 +684,11 @@ p, li { white-space: pre-wrap; }
    </property>
    <property name="text">
     <string>Счетчик FPS</string>
+   </property>
+  </action>
+  <action name="actionClearJrnl">
+   <property name="text">
+    <string>Очистить журнал</string>
    </property>
   </action>
  </widget>
