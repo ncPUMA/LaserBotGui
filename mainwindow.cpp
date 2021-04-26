@@ -107,7 +107,8 @@ private:
         guiSettings(&emptySettings),
         zLayerId(Z_LAYER),
         botSocket(&emptySocket),
-        stateLamp(new QLabel())
+        stateLamp(new QLabel()),
+        attachLamp(new QLabel())
     { }
 
     void init(OpenGl_GraphicDriver &driver) {
@@ -269,7 +270,7 @@ private:
 
     CModelMover mdlMover;
 
-    QLabel * const stateLamp;
+    QLabel * const stateLamp, * const attachLamp;
     QAction *startAction, *stopAction;
     std::map <GUI_TYPES::TMSAA, QAction *> mapMsaa;
 };
@@ -285,64 +286,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     d_ptr->mdlMover.setGui(this);
 
-    //Menu "File"
-    connect(ui->actionImport, SIGNAL(triggered(bool)), SLOT(slImport()));
-    connect(ui->actionExit, SIGNAL(triggered(bool)), SLOT(slExit()));
-
-    //Menu "View"
-    connect(ui->actionShading, SIGNAL(toggled(bool)), SLOT(slShading(bool)));
-    ui->dockSettings->setVisible(false);
-    connect(ui->actionCalib, SIGNAL(toggled(bool)), SLOT(slShowCalibWidget(bool)));
-    //MSAA
-    d_ptr->mapMsaa = std::map <GUI_TYPES::TMSAA, QAction *> {
-        { GUI_TYPES::ENMSAA_OFF, ui->actionMSAA_Off },
-        { GUI_TYPES::ENMSAA_2  , ui->actionMSAA_2X  },
-        { GUI_TYPES::ENMSAA_4  , ui->actionMSAA_4X  },
-        { GUI_TYPES::ENMSAA_8  , ui->actionMSAA_8X  }
-    };
-    for(auto pair : d_ptr->mapMsaa)
-        connect(pair.second, SIGNAL(toggled(bool)), SLOT(slMsaa()));
-    //FPS
-    connect(ui->actionFPS, SIGNAL(toggled(bool)), SLOT(slFpsCounter(bool)));
-
-    //ToolBar
-    ui->toolBar->addAction(QIcon(":/icons/Data/Icons/open.png"),
-                           tr("Импорт..."),
-                           ui->actionImport,
-                           SLOT(trigger()));
-    ui->toolBar->addSeparator();
-    ui->toolBar->addAction(QIcon(":/icons/Data/Icons/shading.png"),
-                           tr("Shading"),
-                           ui->actionShading,
-                           SLOT(toggle()));
-    ui->toolBar->addAction(QIcon(":/icons/Data/Icons/fps-counter.png"),
-                           tr("Счетчик FPS"),
-                           ui->actionFPS,
-                           SLOT(toggle()));
-//    ui->toolBar->addSeparator();
-    QLabel * const strech = new QLabel(" ", ui->toolBar);
-    strech->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    ui->toolBar->addWidget(strech);
-    d_ptr->startAction = ui->toolBar->addAction(QIcon(":/icons/Data/Icons/play.png"),
-                                                tr("Старт"),
-                                                this,
-                                                SLOT(slStart()));
-    d_ptr->startAction = ui->toolBar->addAction(QIcon(":/icons/Data/Icons/stop.png"),
-                                                tr("Стоп"),
-                                                this,
-                                                SLOT(slStop()));
-    QLabel * const txtState = new QLabel(tr("Соединение: "), ui->toolBar);
-    QFont stateFnt = txtState->font();
-    stateFnt.setPointSize(18);
-    txtState->setFont(stateFnt);
-    txtState->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    ui->toolBar->addWidget(txtState);
-    d_ptr->stateLamp->setParent(ui->toolBar);
-    ui->toolBar->addWidget(d_ptr->stateLamp);
-    const QPixmap red(":/Lamps/Data/Lamps/red.png");
-    d_ptr->stateLamp->setPixmap(red.scaled(ui->toolBar->iconSize(),
-                                           Qt::IgnoreAspectRatio,
-                                           Qt::SmoothTransformation));
+    configMenu();
+    configToolBar();
 
     //Callib
     connect(ui->pbApplyCalib, SIGNAL(clicked(bool)), SLOT(slCallibApply()));
@@ -419,15 +364,33 @@ void MainWindow::updateBotSocketState()
                                                          Qt::IgnoreAspectRatio,
                                                          Qt::SmoothTransformation);
 
-    if (d_ptr->mdlMover.socketState() != BotSocket::ENSS_OK)
+    switch(d_ptr->mdlMover.socketState())
     {
-        d_ptr->stateLamp->setPixmap(red);
-        d_ptr->stateLamp->setToolTip(tr("Авария"));
-    }
-    else
-    {
-        d_ptr->stateLamp->setPixmap(green);
-        d_ptr->stateLamp->setToolTip(tr("OK"));
+        using namespace BotSocket;
+
+        case ENSS_FALL:
+            d_ptr->stateLamp->setPixmap(red);
+            d_ptr->stateLamp->setToolTip(tr("Авария"));
+            d_ptr->attachLamp->setPixmap(red);
+            d_ptr->attachLamp->setToolTip(tr("Нет данных"));
+            break;
+        case ENSS_NOT_ATTACHED:
+            d_ptr->stateLamp->setPixmap(green);
+            d_ptr->stateLamp->setToolTip(tr("ОК"));
+            d_ptr->attachLamp->setPixmap(red);
+            d_ptr->attachLamp->setToolTip(tr("Нет захвата"));
+            break;
+        case ENSS_ATTACHED:
+            d_ptr->stateLamp->setPixmap(green);
+            d_ptr->stateLamp->setToolTip(tr("ОК"));
+            d_ptr->attachLamp->setPixmap(green);
+            d_ptr->attachLamp->setToolTip(tr("Захват"));
+            break;
+        default:
+            qDebug() << "ERROR: MainWindow::updateBotSocketState: "
+                        "unkown socket state == "
+                     << d_ptr->mdlMover.socketState();
+            break;
     }
 }
 
@@ -527,5 +490,82 @@ void MainWindow::slStop()
 {
     d_ptr->botSocket->stop();
     d_ptr->context->SetAutomaticHilight(Standard_True);
+}
+
+void MainWindow::configMenu()
+{
+    //Menu "File"
+    connect(ui->actionImport, SIGNAL(triggered(bool)), SLOT(slImport()));
+    connect(ui->actionExit, SIGNAL(triggered(bool)), SLOT(slExit()));
+
+    //Menu "View"
+    connect(ui->actionShading, SIGNAL(toggled(bool)), SLOT(slShading(bool)));
+    ui->dockSettings->setVisible(false);
+    connect(ui->actionCalib, SIGNAL(toggled(bool)), SLOT(slShowCalibWidget(bool)));
+    //MSAA
+    d_ptr->mapMsaa = std::map <GUI_TYPES::TMSAA, QAction *> {
+        { GUI_TYPES::ENMSAA_OFF, ui->actionMSAA_Off },
+        { GUI_TYPES::ENMSAA_2  , ui->actionMSAA_2X  },
+        { GUI_TYPES::ENMSAA_4  , ui->actionMSAA_4X  },
+        { GUI_TYPES::ENMSAA_8  , ui->actionMSAA_8X  }
+    };
+    for(auto pair : d_ptr->mapMsaa)
+        connect(pair.second, SIGNAL(toggled(bool)), SLOT(slMsaa()));
+    //FPS
+    connect(ui->actionFPS, SIGNAL(toggled(bool)), SLOT(slFpsCounter(bool)));
+}
+
+void MainWindow::configToolBar()
+{
+    //ToolBar
+    ui->toolBar->addAction(QIcon(":/icons/Data/Icons/open.png"),
+                           tr("Импорт..."),
+                           ui->actionImport,
+                           SLOT(trigger()));
+    ui->toolBar->addSeparator();
+    ui->toolBar->addAction(QIcon(":/icons/Data/Icons/shading.png"),
+                           tr("Shading"),
+                           ui->actionShading,
+                           SLOT(toggle()));
+    ui->toolBar->addAction(QIcon(":/icons/Data/Icons/fps-counter.png"),
+                           tr("Счетчик FPS"),
+                           ui->actionFPS,
+                           SLOT(toggle()));
+//    ui->toolBar->addSeparator();
+    QLabel * const strech = new QLabel(" ", ui->toolBar);
+    strech->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    ui->toolBar->addWidget(strech);
+    d_ptr->startAction = ui->toolBar->addAction(QIcon(":/icons/Data/Icons/play.png"),
+                                                tr("Старт"),
+                                                this,
+                                                SLOT(slStart()));
+    d_ptr->startAction = ui->toolBar->addAction(QIcon(":/icons/Data/Icons/stop.png"),
+                                                tr("Стоп"),
+                                                this,
+                                                SLOT(slStop()));
+
+    //State and attach
+    QFont fnt = font();
+    fnt.setPointSize(18);
+    const QPixmap red =
+            QPixmap(":/Lamps/Data/Lamps/red.png").scaled(ui->toolBar->iconSize(),
+                                                         Qt::IgnoreAspectRatio,
+                                                         Qt::SmoothTransformation);
+
+    QLabel * const txtState = new QLabel(tr("Соединение: "), ui->toolBar);
+    txtState->setFont(fnt);
+    txtState->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    ui->toolBar->addWidget(txtState);
+    d_ptr->stateLamp->setParent(ui->toolBar);
+    ui->toolBar->addWidget(d_ptr->stateLamp);
+    d_ptr->stateLamp->setPixmap(red);
+
+    QLabel * const txtAttach = new QLabel(tr(" Захват: "), ui->toolBar);
+    txtAttach->setFont(fnt);
+    txtAttach->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    ui->toolBar->addWidget(txtAttach);
+    d_ptr->attachLamp->setParent(ui->toolBar);
+    ui->toolBar->addWidget(d_ptr->attachLamp);
+    d_ptr->attachLamp->setPixmap(red);
 }
 

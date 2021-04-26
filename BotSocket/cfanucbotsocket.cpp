@@ -8,7 +8,7 @@ BotSocket::TSocketError CFanucBotSocket::startSocket()
         transformModel(pos.x, pos.y, pos.z, pos.w, pos.p, pos.r);
     });
     QObject::connect(&fanuc_socket_, &FanucSocket::connection_state_changed, [&](bool ok){
-        stateChanged(ok ? BotSocket::ENSS_OK : BotSocket::ENSS_FALL);
+        stateChanged(ok ? BotSocket::ENSS_ATTACHED : BotSocket::ENSS_FALL);
     });
     stateChanged(socketState());
     return BotSocket::ENSE_NO;
@@ -24,5 +24,5 @@ void CFanucBotSocket::stopSocket()
 
 BotSocket::TSocketState CFanucBotSocket::socketState() const
 {
-    return (fanuc_socket_.connected() && active_) ? BotSocket::ENSS_OK : BotSocket::ENSS_FALL;
+    return (fanuc_socket_.connected() && active_) ? BotSocket::ENSS_ATTACHED : BotSocket::ENSS_FALL;
 }

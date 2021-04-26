@@ -43,19 +43,17 @@ void CBotSocketImitator::setMessageInterval(const int interval)
 BotSocket::TSocketError CBotSocketImitator::startSocket()
 {
     d_ptr->tm.start();
-    stateChanged(BotSocket::ENSS_OK);
     return BotSocket::ENSE_NO;
 }
 
 void CBotSocketImitator::stopSocket()
 {
     d_ptr->tm.stop();
-    stateChanged(BotSocket::ENSS_FALL);
 }
 
 BotSocket::TSocketState CBotSocketImitator::socketState() const
 {
-    return d_ptr->tm.isActive() ? BotSocket::ENSS_OK : BotSocket::ENSS_FALL;
+    return BotSocket::ENSS_ATTACHED;
 }
 
 void CBotSocketImitator::slTmTimeout()

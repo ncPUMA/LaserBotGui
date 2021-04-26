@@ -50,6 +50,10 @@ private slots:
     void slStop();
 
 private:
+    void configMenu();
+    void configToolBar();
+
+private:
     Ui::MainWindow *ui;
     MainWindowPrivate * const d_ptr;
 };

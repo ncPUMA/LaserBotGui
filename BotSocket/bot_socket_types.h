@@ -15,8 +15,9 @@ typedef int TSocketError;
 
 enum EN_SocketState
 {
-    ENSS_OK = 0,
-    ENSS_FALL
+    ENSS_FALL,
+    ENSS_NOT_ATTACHED,
+    ENSS_ATTACHED
 };
 typedef int TSocketState;
 
