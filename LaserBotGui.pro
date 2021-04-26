@@ -80,9 +80,9 @@ DISTFILES += \
     .gitignore \
     Data/Icons/fps-counter.png \
     Data/Icons/open.png \
-    Data/Icons/pause.png \
     Data/Icons/play.png \
     Data/Icons/shading.png \
+    Data/Icons/stop.png \
     Data/Lamps/green.png \
     Data/Lamps/red.png \
     Data/Models/plate.stp \

@@ -327,7 +327,7 @@ MainWindow::MainWindow(QWidget *parent) :
                                                 tr("Старт"),
                                                 this,
                                                 SLOT(slStart()));
-    d_ptr->startAction = ui->toolBar->addAction(QIcon(":/icons/Data/Icons/pause.png"),
+    d_ptr->startAction = ui->toolBar->addAction(QIcon(":/icons/Data/Icons/stop.png"),
                                                 tr("Стоп"),
                                                 this,
                                                 SLOT(slStop()));

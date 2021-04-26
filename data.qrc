@@ -5,7 +5,7 @@
     </qresource>
     <qresource prefix="/icons">
         <file>Data/Icons/open.png</file>
-        <file>Data/Icons/pause.png</file>
+        <file>Data/Icons/stop.png</file>
         <file>Data/Icons/play.png</file>
         <file>Data/Icons/shading.png</file>
         <file>Data/Icons/fps-counter.png</file>
