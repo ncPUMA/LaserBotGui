@@ -16,10 +16,12 @@ public:
     explicit FanucSocket(QObject *parent = nullptr);
 
     bool connected() const;
+    bool attached() const;
 
 signals:
     void position_received(struct position pos);
-    void connection_state_changed(bool connected);
+    void connection_state_changed(bool attached);
+    void attached_changed(bool attached);
 
 private slots:
     void on_readyread();
@@ -31,7 +33,8 @@ private:
     void start_connection();
 
     QTcpSocket socket_;
-    position offset_;
+    position offset_ = {};
+    bool attached_ = false;
 };
 
 #endif // FANUCSOCKET_H
