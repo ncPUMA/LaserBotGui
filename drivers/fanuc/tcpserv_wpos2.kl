@@ -1,0 +1,153 @@
+PROGRAM tcpserv_wpos2
+%ALPHABETIZE
+%COMMENT = 'tcp server lpos write'
+%NOLOCKGROUP
+%NOPAUSE=ERROR+COMMAND+TPENABLE
+%ENVIRONMENT flbt -- socket messaging
+%ENVIRONMENT sysdef -- system variables
+%ENVIRONMENT tim -- time
+%ENVIRONMENT regope -- register operations
+-------------------------------------------------------------------------------
+TYPE
+	state_pkt_t = STRUCTURE
+		t: INTEGER
+        lock: INTEGER
+		w: XYZWPR
+		u: XYZWPR
+		j: JOINTPOS
+	ENDSTRUCTURE
+-------------------------------------------------------------------------------
+CONST
+	LOOP_HZ =   25  -- Main loop freq (Hz).
+-------------------------------------------------------------------------------
+VAR
+	socket_fd : FILE
+	cur_pos_: XYZWPR
+	cur_j_pos_: JOINTPOS
+	status : INTEGER
+	-- entry : INTEGER
+	n_bytes : INTEGER
+	shutdown_req : BOOLEAN
+	sleep_time: INTEGER
+	pkt: state_pkt_t
+	
+	user_frames : ARRAY[6] OF POSITION
+	var_entry, user_framenum : INTEGER
+	
+	pos_: XYZWPR
+	jpos_: JOINTPOS
+-------------------------------------------------------------------------------
+ROUTINE get_state_pos(pkt : state_pkt_t) FROM tcpserv_wpos2
+ROUTINE write_state_pos(pkt : state_pkt_t): INTEGER FROM tcpserv_wpos2
+-------------------------------------------------------------------------------
+BEGIN
+	$UTOOL    = $MNUTOOL[1,1]
+	$UFRAME = $MNUFRAME[1,1]
+	
+	-- set the server port before doing a connect
+	-- SET_VAR(entry, '*SYSTEM*', '$HOSTS_CFG[3].$SERVER_PORT', 59002, status)
+	
+	-- make sure disconnected
+	MSG_DISCO('S3:',status)
+	
+	shutdown_req = FALSE
+	sleep_time  = ROUND(1000.0 / LOOP_HZ) -- hmm.. seems correct delay is ROUND(1000.0 / LOOP_HZ) 
+	WHILE (NOT shutdown_req) DO
+		WRITE('Connecting..')
+		MSG_CONNECT('S3:', status)
+		IF status <> 0 THEN
+			WRITE('Bad connect', CR)
+			GOTO exit_disconnect
+		ENDIF
+		WRITE('Connected', CR)
+		
+		WRITE ('Opening..')
+		OPEN FILE socket_fd ('rw','S3:')
+		status = IO_STATUS(socket_fd)
+		IF status <> 0 THEN
+			WRITE('Bad open', CR)
+			GOTO exit_disconnect
+		ENDIF
+		
+		-- binary format
+		WRITE ('Setting binary..')
+		SET_FILE_ATR(socket_fd, ATR_UF)
+		status = IO_STATUS(socket_fd)
+		IF status <> 0 THEN
+			WRITE('Bad set_file_attr', CR)
+			GOTO exit_disconnect
+		ENDIF
+		
+		WRITE ('Opened', CR)
+		
+		WHILE (NOT shutdown_req) DO
+			get_state_pos(pkt)
+			status = write_state_pos(pkt)
+			IF status <> 0 THEN
+				WRITE('Bad write', CR)
+				GOTO exit_disconnect
+			ENDIF
+			DELAY sleep_time
+		ENDWHILE
+		
+exit_disconnect::
+		WRITE('Status = ', status, CR)
+		WRITE('Closing file..', CR)
+		CLOSE FILE socket_fd
+		status = IO_STATUS(socket_fd)
+		IF status <> 0 THEN
+			WRITE('Bad close', status, CR)
+		ENDIF
+		WRITE('Disconnecting..',CR)
+		MSG_DISCO('S3:',status)
+		IF status <> 0 THEN
+			WRITE('Bad disconnect', status, CR)
+		ENDIF
+		WRITE('Disconnected.',CR)
+
+	ENDWHILE
+	
+END tcpserv_wpos2
+
+ROUTINE get_state_pos
+VAR
+	c: CONFIG
+    reg_real_flag: BOOLEAN
+    reg_int_val: INTEGER
+    reg_real_val: REAL
+    status: INTEGER
+BEGIN
+	--GET_TIME(pkt.t)
+	pkt.t = GET_USEC_TIM
+    
+    GET_REG(101, reg_real_flag, reg_int_val, reg_real_val, status)
+    IF ((status <> 0) OR reg_real_flag) THEN
+        pkt.lock = 0
+        WRITE('Invalid 101 reg value')
+    ELSE
+        pkt.lock = reg_int_val
+    ENDIF
+    
+    
+	pkt.j = CURJPOS(0,0)
+	
+	$UFRAME = $MNUFRAME[1,1]
+	$UTOOL = $MNUTOOL[1,1]
+	
+	pkt.u = CURPOS(0,0)
+	UNPOS(pkt.u, 0, 0, 0, 0, 0, 0, c)
+	--WRITE ('User', pos_, CR)
+	
+	$UFRAME = POS(0,0,0,0,0,0,c)
+	pkt.w = CURPOS(0,0)
+	--WRITE ('World', pos_, CR)
+END get_state_pos
+
+ROUTINE write_state_pos
+BEGIN
+	-- WRITE('Writing', pkt.t, CR)
+	-- FIXME: not GLOBAL
+	WRITE socket_fd (pkt.t, pkt.lock, pkt.w, pkt.u, pkt.j, CR)
+	RETURN (IO_STATUS(socket_fd))
+
+END write_state_pos
