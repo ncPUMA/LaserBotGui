@@ -140,7 +140,7 @@ private:
                 .arg(mdlMover.getRY() , 11, 'f', 6, QChar('0'))
                 .arg(mdlMover.getRZ() , 11, 'f', 6, QChar('0'));
         NCollection_Vector <Handle(AIS_InteractiveObject)> crossObj =
-                cross.objects(botTxt.toLocal8Bit().constData());
+                cross.objects(botTxt.toStdString().c_str());
         for(NCollection_Vector <Handle(AIS_InteractiveObject)>::Iterator it(crossObj);
             it.More(); it.Next()) {
             const Handle(AIS_InteractiveObject)& obj = it.Value();

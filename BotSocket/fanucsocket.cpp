@@ -26,6 +26,7 @@
 
     struct statepos{
         uint32_t time;
+        uint32_t attached;
         struct xyzwpr w;
         struct xyzwpr u;
         struct jointpos j;
@@ -56,9 +57,15 @@ bool FanucSocket::connected() const
     return socket_.state() == QAbstractSocket::ConnectedState;
 }
 
+bool FanucSocket::attached() const
+{
+    return attached_;
+}
+
 void FanucSocket::on_connected()
 {
     qDebug("Connected");
+    attached_ = false;
     emit connection_state_changed(true);
 }
 
@@ -104,9 +111,15 @@ void FanucSocket::on_readyread()
                               s.w.w - offset_.w,
                               s.w.p - offset_.p,
                               s.w.r - offset_.r};
-    qDebug("{%f, %f, %f, %f, %f, %f, %f},",
-           ((double)s.time)/1e6, pos.x, pos.y, pos.z, pos.w, pos.p, pos.r);
+    qDebug("{%f, %d, %f, %f, %f, %f, %f, %f},",
+           ((double)s.time)/1e6, s.attached, pos.x, pos.y, pos.z, pos.w, pos.p, pos.r);
     emit position_received(pos);
+    bool lock = s.attached != 0;
+    if(lock != attached_)
+    {
+        attached_ = lock;
+        emit attached_changed(attached_);
+    }
 }
 
 void FanucSocket::start_connection()
