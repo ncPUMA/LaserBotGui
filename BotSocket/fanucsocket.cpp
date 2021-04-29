@@ -78,7 +78,7 @@ void FanucSocket::on_disconnected()
 
 void FanucSocket::on_error(QAbstractSocket::SocketError error)
 {
-    qDebug("Error %d", error);
+    qDebug() << "Error " << error << " (" << socket_.errorString() << "";
     socket_.disconnectFromHost();
     QTimer::singleShot(1000, this, &FanucSocket::start_connection);
     emit connection_state_changed(false);
