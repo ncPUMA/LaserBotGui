@@ -16,6 +16,7 @@ class CBotCrossPrivate
         point = new AIS_Point(geomPoint);
 
         txtCoord = new AIS_TextLabel();
+        txtCoord->SetColor(Quantity_Color(.15, .15, 0.15, Quantity_TOC_RGB));
         txtCoord->SetText("Coord: 0. 0. 0.\n   Ang: 0. 0. 0.");
         txtCoord->SetPosition(gp_Pnt(pnt.X(), pnt.Y(), pnt.Z()));
     }

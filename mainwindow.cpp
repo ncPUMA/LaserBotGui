@@ -20,6 +20,7 @@
 #include <BRepBuilderAPI_GTransform.hxx>
 #include <AIS_ViewCube.hxx>
 #include <IntCurvesFace_ShapeIntersector.hxx>
+#include <Prs3d_DatumAspect.hxx>
 
 #include "ModelLoader/cmodelloaderfactorymethod.h"
 #include "ModelLoader/cabstractmodelloader.h"
@@ -35,6 +36,9 @@
 #include "cabstractguisettings.h"
 
 constexpr double DEGREE_K = M_PI / 180.;
+
+static const Quantity_Color BG_CLR  = Quantity_Color(.7765,  .9, 1.  , Quantity_TOC_RGB);
+static const Quantity_Color TXT_CLR = Quantity_Color(  .15, .15, 0.15, Quantity_TOC_RGB);
 
 class CEmptyGuiSettings : public CAbstractGuiSettings
 {
@@ -121,6 +125,10 @@ private:
         viewer->SetLightOn();
 
         context = new AIS_InteractiveContext(viewer);
+        Handle(Prs3d_DatumAspect) datum = context->DefaultDrawer()->DatumAspect();
+        datum->TextAspect(Prs3d_DatumParts_XAxis)->SetColor(TXT_CLR);
+        datum->TextAspect(Prs3d_DatumParts_YAxis)->SetColor(TXT_CLR);
+        datum->TextAspect(Prs3d_DatumParts_ZAxis)->SetColor(TXT_CLR);
 
         viewer->AddZLayer(zLayerId);
         Graphic3d_ZLayerSettings settings = viewer->ZLayerSettings(zLayerId);
@@ -206,6 +214,7 @@ private:
         aViewCube->SetDrawEdges(Standard_False);
         aViewCube->SetDrawVertices(Standard_False);
         aViewCube->SetBoxTransparency(1.);
+        aViewCube->AIS_InteractiveObject::SetColor(TXT_CLR);
         TCollection_AsciiString emptyStr;
         aViewCube->SetBoxSideLabel(V3d_Xpos, emptyStr);
         aViewCube->SetBoxSideLabel(V3d_Ypos, emptyStr);
@@ -303,6 +312,7 @@ void MainWindow::init(OpenGl_GraphicDriver &driver)
 {
     d_ptr->init(driver);
     ui->mainView->init(*d_ptr->context);
+    ui->mainView->setBackgroundColor(BG_CLR);
     ui->mainView->setStatsVisible(ui->actionFPS->isChecked());
 }
 

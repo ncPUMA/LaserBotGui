@@ -24,7 +24,6 @@ class CMainViewportPrivate : public AIS_ViewController
     void init(AIS_InteractiveContext &extContext) {
         context = &extContext;
         v3dView = context->CurrentViewer()->CreateView().get();
-        v3dView->SetBackgroundColor(Quantity_Color(0.3, 0.3, 0.3, Quantity_TOC_RGB));
 
         aspect = new CAspectWindow(*q_ptr);
         v3dView->SetWindow(aspect);
@@ -110,6 +109,13 @@ void CMainViewport::setStatsVisible(const bool value)
 void CMainViewport::fitInView()
 {
     d_ptr->fitInView();
+}
+
+void CMainViewport::setBackgroundColor(const Quantity_Color &clr)
+{
+    Q_ASSERT(!d_ptr->v3dView.IsNull());
+
+    d_ptr->v3dView->SetBackgroundColor(clr);
 }
 
 QPaintEngine *CMainViewport::paintEngine() const

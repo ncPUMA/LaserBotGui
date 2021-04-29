@@ -7,6 +7,7 @@
 
 class CMainViewportPrivate;
 class AIS_InteractiveContext;
+class Quantity_Color;
 
 class CMainViewport : public QWidget
 {
@@ -20,6 +21,7 @@ public:
     void setMSAA(const GUI_TYPES::TMSAA msaa);
     void setStatsVisible(const bool value);
     void fitInView();
+    void setBackgroundColor(const Quantity_Color &clr);
 
 protected:
     QPaintEngine* paintEngine() const final;

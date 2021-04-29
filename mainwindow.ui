@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>LaserBotGui</string>
+   <string>Роботизированный комплекс лазерной обработки</string>
   </property>
   <property name="iconSize">
    <size>
