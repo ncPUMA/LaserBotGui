@@ -36,7 +36,7 @@ void CLaserVec::Compute (const Handle(PrsMgr_PresentationManager3d)& ,
 
     // Draw Line
     {
-        myDrawer->SetLineAspect(new Prs3d_LineAspect(Quantity_NOC_RED, Aspect_TOL_SOLID, 1.0));
+        myDrawer->SetLineAspect(new Prs3d_LineAspect(Quantity_NOC_RED, Aspect_TOL_SOLID, 2.));
         Handle(Graphic3d_Group) aLineGroup = thePrs->NewGroup();
         aLineGroup->SetGroupPrimitivesAspect(myDrawer->LineAspect()->Aspect());
         Handle(Graphic3d_ArrayOfSegments) aPrims = new Graphic3d_ArrayOfSegments(2);
