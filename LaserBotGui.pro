@@ -86,6 +86,7 @@ DISTFILES += \
     Data/Lamps/green.png \
     Data/Lamps/red.png \
     Data/Models/plate.stp \
+    Data/Models/turbine_blade.stp \
     Data/StyleSheets/style.qss \
     LICENSE \
     README.md
