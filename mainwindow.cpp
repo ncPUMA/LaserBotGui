@@ -220,7 +220,7 @@ private:
     }
 
     bool load(const QString &fName, CAbstractModelLoader &loader, const bool shading) {
-        const TopoDS_Shape shape = loader.load(fName.toLocal8Bit().constData());
+        const TopoDS_Shape shape = loader.load(fName.toStdString().c_str());
         curModel = affinityTransform(shape);
         reDrawScene(shading);
         return !curModel.IsNull();
