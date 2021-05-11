@@ -85,6 +85,7 @@ DISTFILES += \
     Data/Icons/stop.png \
     Data/Lamps/green.png \
     Data/Lamps/red.png \
+    Data/Models/gripper_v1.step \
     Data/Models/plate.stp \
     Data/Models/turbine_blade.stp \
     Data/StyleSheets/style.qss \
