@@ -23,7 +23,7 @@
 #include <Prs3d_DatumAspect.hxx>
 
 #include "ModelLoader/cmodelloaderfactorymethod.h"
-#include "ModelLoader/cabstractmodelloader.h"
+#include "ModelLoader/csteploader.h"
 
 #include "BotSocket/cabstractbotsocket.h"
 #include "cmodelmover.h"
@@ -68,6 +68,9 @@ public:
     double getGripRotationX() const final { return 0; }
     double getGripRotationY() const final { return 0; }
     double getGripRotationZ() const final { return 0; }
+    double getGripAnchorX() const final { return 0; }
+    double getGripAnchorY() const final { return 0; }
+    double getGripAnchorZ() const final { return 0; }
     double getGripScale() const final { return 0; }
 
     void setTranslationX(const double) final { }
@@ -95,6 +98,9 @@ public:
     void setGripRotationX(const double) final { }
     void setGripRotationY(const double) final { }
     void setGripRotationZ(const double) final { }
+    void setGripAnchorX(const double) final { }
+    void setGripAnchorY(const double) final { }
+    void setGripAnchorZ(const double) final { }
     void setGripScale(const double) final { }
 };
 
@@ -150,6 +156,15 @@ private:
         Graphic3d_ZLayerSettings settings = viewer->ZLayerSettings(zLayerId);
         settings.SetEnableDepthTest(Standard_False);
         viewer->SetZLayerSettings(zLayerId, settings);
+
+        //load gripModel
+        QFile gripFile(":/Models/Data/Models/gripper_v1.step");
+        if (gripFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            const QByteArray stepData = gripFile.readAll();
+            CStepLoader loader;
+            gripModel = loader.loadFromBinaryData(stepData.constData(), static_cast <size_t> (stepData.size()));
+        }
     }
 
     void reDrawScene(const bool shading) {
@@ -173,6 +188,55 @@ private:
             context->SetZLayer(obj, zLayerId);
         }
 
+        //draw The Grip
+        if (guiSettings->isGripVisible())
+        {
+            //translation
+            gp_Trsf trsfTr = gripModel.Location().Transformation();
+            const gp_Vec translation(guiSettings->getGripTranslationX() + mdlMover.getTrX(),
+                                     guiSettings->getGripTranslationY() + mdlMover.getTrY(),
+                                     guiSettings->getGripTranslationZ() + mdlMover.getTrZ());
+            trsfTr.SetTranslation(translation);
+
+            //localRotation
+            const gp_Pnt localAnchor(guiSettings->getGripAnchorX(), guiSettings->getGripAnchorY(), guiSettings->getGripAnchorZ());
+            gp_Trsf trsfLRX = gripModel.Location().Transformation();
+            trsfLRX.SetRotation(gp_Ax1(localAnchor, gp_Dir(1.,0.,0.)),
+                                guiSettings->getGripRotationX() * DEGREE_K);
+            gp_Trsf trsfLRY = gripModel.Location().Transformation();
+            trsfLRY.SetRotation(gp_Ax1(localAnchor, gp_Dir(0.,1.,0.)),
+                                guiSettings->getGripRotationY() * DEGREE_K);
+            gp_Trsf trsfLRZ = gripModel.Location().Transformation();
+            trsfLRZ.SetRotation(gp_Ax1(localAnchor, gp_Dir(0.,0.,1.)),
+                                guiSettings->getGripRotationZ() * DEGREE_K);
+
+            //globalRotation
+            const gp_Pnt globalAnchor(guiSettings->getAnchorX(), guiSettings->getAnchorY(), guiSettings->getAnchorZ());
+            gp_Trsf trsfGRX = gripModel.Location().Transformation();
+            trsfGRX.SetRotation(gp_Ax1(globalAnchor, gp_Dir(1.,0.,0.)),
+                                mdlMover.getRX() * DEGREE_K);
+            gp_Trsf trsfGRY = gripModel.Location().Transformation();
+            trsfGRY.SetRotation(gp_Ax1(globalAnchor, gp_Dir(0.,1.,0.)),
+                                mdlMover.getRY() * DEGREE_K);
+            gp_Trsf trsfGRZ = gripModel.Location().Transformation();
+            trsfGRZ.SetRotation(gp_Ax1(globalAnchor, gp_Dir(0.,0.,1.)),
+                                mdlMover.getRZ() * DEGREE_K);
+
+            //scale
+            gp_Trsf trsfSc = gripModel.Location().Transformation();
+            double scaleFactor = guiSettings->getGripScale();
+            if (scaleFactor == 0.)
+                scaleFactor = 1.;
+            trsfSc.SetScale(globalAnchor, scaleFactor);
+
+            gripModel.Location(trsfTr * trsfGRX * trsfGRY * trsfGRZ * trsfLRX * trsfLRY * trsfLRZ * trsfSc);
+
+            Handle(AIS_Shape) ais_grip = new AIS_Shape(gripModel);
+            context->SetDisplayMode(ais_grip, shading ? 1 : 0, Standard_False);
+            context->Display(ais_grip, Standard_False);
+        }
+
+        //Draw Plate or other
         //translation
         gp_Trsf trsfTr = curModel.Location().Transformation();
         const gp_Vec translation(guiSettings->getTranslationX() + mdlMover.getTrX(),
@@ -226,6 +290,7 @@ private:
             context->Display(lVec, Standard_False);
         }
 
+        //Draw AIS_ViewCube
         Handle(AIS_ViewCube) aViewCube = new AIS_ViewCube();
         aViewCube->SetDrawEdges(Standard_False);
         aViewCube->SetDrawVertices(Standard_False);
@@ -287,6 +352,7 @@ private:
     Standard_Integer zLayerId;
 
     TopoDS_Shape curModel;
+    TopoDS_Shape gripModel;
 
     CEmptyBotSocket emptySocket;
     CAbstractBotSocket *botSocket;
@@ -353,6 +419,19 @@ void MainWindow::setSettings(CAbstractGuiSettings &settings)
     ui->dsbScale->setValue(settings.getScale());
 
     d_ptr->setMSAA(settings.getMsaa(), *ui->mainView);
+
+    //For The Grip
+    ui->checkGripVis->setChecked(settings.isGripVisible());
+    ui->dsbGripTrX->setValue(settings.getGripTranslationX());
+    ui->dsbGripTrY->setValue(settings.getGripTranslationY());
+    ui->dsbGripTrZ->setValue(settings.getGripTranslationZ());
+    ui->dsbGripRtX->setValue(settings.getGripRotationX());
+    ui->dsbGripRtY->setValue(settings.getGripRotationY());
+    ui->dsbGripRtZ->setValue(settings.getGripRotationZ());
+    ui->dsbGripAnchX->setValue(settings.getGripAnchorX());
+    ui->dsbGripAnchY->setValue(settings.getGripAnchorY());
+    ui->dsbGripAnchZ->setValue(settings.getGripAnchorZ());
+    ui->dsbGripScale->setValue(settings.getGripScale());
 }
 
 void MainWindow::setBotSocket(CAbstractBotSocket &socket)
@@ -515,6 +594,9 @@ void MainWindow::slCallibApply()
     d_ptr->guiSettings->setGripRotationX(ui->dsbGripRtX->value());
     d_ptr->guiSettings->setGripRotationY(ui->dsbGripRtY->value());
     d_ptr->guiSettings->setGripRotationZ(ui->dsbGripRtZ->value());
+    d_ptr->guiSettings->setGripAnchorX(ui->dsbGripAnchX->value());
+    d_ptr->guiSettings->setGripAnchorY(ui->dsbGripAnchY->value());
+    d_ptr->guiSettings->setGripAnchorZ(ui->dsbGripAnchZ->value());
     d_ptr->guiSettings->setGripScale(ui->dsbGripScale->value());
 
 //    d_ptr->curModel = d_ptr->affinityTransform(d_ptr->curModel);

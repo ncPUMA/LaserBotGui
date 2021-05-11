@@ -38,6 +38,9 @@ enum EN_GuiKeys
     ENGK_GRIP_ROT_X,
     ENGK_GRIP_ROT_Y,
     ENGK_GRIP_ROT_Z,
+    ENGK_GRIP_ANCH_X,
+    ENGK_GRIP_ANCH_Y,
+    ENGK_GRIP_ANCH_Z,
     ENGK_GRIP_SC,
 
     ENGK_LAST
@@ -45,31 +48,34 @@ enum EN_GuiKeys
 typedef int TGuiKey;
 
 static const std::map <TGuiKey, QString> guiKeyMap = {
-    { ENGK_TR_X      , "tr_x"         },
-    { ENGK_TR_Y      , "tr_y"         },
-    { ENGK_TR_Z      , "tr_z"         },
-    { ENGK_ROT_X     , "rot_x"        },
-    { ENGK_ROT_Y     , "rot_y"        },
-    { ENGK_ROT_Z     , "rot_z"        },
-    { ENGK_SC_X      , "sc_x"         },
-    { ENGK_SC_Y      , "sc_y"         },
-    { ENGK_SC_Z      , "sc_z"         },
-    { ENGK_ANCH_X    , "anch_x"       },
-    { ENGK_ANCH_Y    , "anch_y"       },
-    { ENGK_ANCH_Z    , "anch_z"       },
-    { ENGK_LX        , "laser_x"      },
-    { ENGK_LY        , "laser_y"      },
-    { ENGK_LZ        , "laser_z"      },
-    { ENGK_SC        , "sc"           },
-    { ENGK_MSAA      , "msaa"         },
-    { ENGK_GRIP_VIS  , "grip_vis"     },
-    { ENGK_GRIP_TR_X , "grip_tr_x"    },
-    { ENGK_GRIP_TR_Y , "grip_tr_y"    },
-    { ENGK_GRIP_TR_Z , "grip_tr_z"    },
-    { ENGK_GRIP_ROT_X, "grip_rot_x"   },
-    { ENGK_GRIP_ROT_Y, "grip_rot_y"   },
-    { ENGK_GRIP_ROT_Z, "grip_rot_z"   },
-    { ENGK_GRIP_SC   , "grip_sc"      }
+    { ENGK_TR_X       , "tr_x"         },
+    { ENGK_TR_Y       , "tr_y"         },
+    { ENGK_TR_Z       , "tr_z"         },
+    { ENGK_ROT_X      , "rot_x"        },
+    { ENGK_ROT_Y      , "rot_y"        },
+    { ENGK_ROT_Z      , "rot_z"        },
+    { ENGK_SC_X       , "sc_x"         },
+    { ENGK_SC_Y       , "sc_y"         },
+    { ENGK_SC_Z       , "sc_z"         },
+    { ENGK_ANCH_X     , "anch_x"       },
+    { ENGK_ANCH_Y     , "anch_y"       },
+    { ENGK_ANCH_Z     , "anch_z"       },
+    { ENGK_LX         , "laser_x"      },
+    { ENGK_LY         , "laser_y"      },
+    { ENGK_LZ         , "laser_z"      },
+    { ENGK_SC         , "sc"           },
+    { ENGK_MSAA       , "msaa"         },
+    { ENGK_GRIP_VIS   , "grip_vis"     },
+    { ENGK_GRIP_TR_X  , "grip_tr_x"    },
+    { ENGK_GRIP_TR_Y  , "grip_tr_y"    },
+    { ENGK_GRIP_TR_Z  , "grip_tr_z"    },
+    { ENGK_GRIP_ROT_X , "grip_rot_x"   },
+    { ENGK_GRIP_ROT_Y , "grip_rot_y"   },
+    { ENGK_GRIP_ROT_Z , "grip_rot_z"   },
+    { ENGK_GRIP_ANCH_X, "grip_anch_x"       },
+    { ENGK_GRIP_ANCH_Y, "grip_anch_y"       },
+    { ENGK_GRIP_ANCH_Z, "grip_anch_z"       },
+    { ENGK_GRIP_SC    , "grip_sc"      }
 };
 
 static const char *BOT_PREFIX = "BOT";
@@ -125,6 +131,9 @@ public:
     double getGripRotationX() const final { return readGuiValue <double> (ENGK_GRIP_ROT_X); }
     double getGripRotationY() const final { return readGuiValue <double> (ENGK_GRIP_ROT_Y); }
     double getGripRotationZ() const final { return readGuiValue <double> (ENGK_GRIP_ROT_Z); }
+    double getGripAnchorX() const final { return readGuiValue <double> (ENGK_GRIP_ANCH_X); }
+    double getGripAnchorY() const final { return readGuiValue <double> (ENGK_GRIP_ANCH_Y); }
+    double getGripAnchorZ() const final { return readGuiValue <double> (ENGK_GRIP_ANCH_Z); }
     double getGripScale() const final { return readGuiValue <double> (ENGK_GRIP_SC); }
 
     void setTranslationX(const double value) final { writeGuiValue(ENGK_TR_X, value); }
@@ -152,6 +161,9 @@ public:
     void setGripRotationX(const double value) final { writeGuiValue(ENGK_GRIP_ROT_X, value); }
     void setGripRotationY(const double value) final { writeGuiValue(ENGK_GRIP_ROT_Y, value); }
     void setGripRotationZ(const double value) final { writeGuiValue(ENGK_GRIP_ROT_Z, value); }
+    void setGripAnchorX(const double value) final { writeGuiValue(ENGK_GRIP_ANCH_X, value); }
+    void setGripAnchorY(const double value) final { writeGuiValue(ENGK_GRIP_ANCH_Y, value); }
+    void setGripAnchorZ(const double value) final { writeGuiValue(ENGK_GRIP_ANCH_Z, value); }
     void setGripScale(const double value) final { writeGuiValue(ENGK_GRIP_SC, value); }
 
     //CAbstractBotSocketSettings

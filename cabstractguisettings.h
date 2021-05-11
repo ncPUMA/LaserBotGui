@@ -34,6 +34,9 @@ public:
     virtual double getGripRotationX() const = 0;
     virtual double getGripRotationY() const = 0;
     virtual double getGripRotationZ() const = 0;
+    virtual double getGripAnchorX() const = 0;
+    virtual double getGripAnchorY() const = 0;
+    virtual double getGripAnchorZ() const = 0;
     virtual double getGripScale() const = 0;
 
     virtual void setTranslationX(const double value) = 0;
@@ -61,6 +64,9 @@ public:
     virtual void setGripRotationX(const double value) = 0;
     virtual void setGripRotationY(const double value) = 0;
     virtual void setGripRotationZ(const double value) = 0;
+    virtual void setGripAnchorX(const double value) = 0;
+    virtual void setGripAnchorY(const double value) = 0;
+    virtual void setGripAnchorZ(const double value) = 0;
     virtual void setGripScale(const double value) = 0;
 };
 
