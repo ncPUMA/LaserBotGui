@@ -31,29 +31,45 @@ enum EN_GuiKeys
     ENGK_LZ,
     ENGK_SC,
     ENGK_MSAA,
+    ENGK_GRIP_VIS,
+    ENGK_GRIP_TR_X,
+    ENGK_GRIP_TR_Y,
+    ENGK_GRIP_TR_Z,
+    ENGK_GRIP_ROT_X,
+    ENGK_GRIP_ROT_Y,
+    ENGK_GRIP_ROT_Z,
+    ENGK_GRIP_SC,
 
     ENGK_LAST
 };
 typedef int TGuiKey;
 
 static const std::map <TGuiKey, QString> guiKeyMap = {
-    { ENGK_TR_X  , "tr_x"    },
-    { ENGK_TR_Y  , "tr_y"    },
-    { ENGK_TR_Z  , "tr_z"    },
-    { ENGK_ROT_X , "rot_x"   },
-    { ENGK_ROT_Y , "rot_y"   },
-    { ENGK_ROT_Z , "rot_z"   },
-    { ENGK_SC_X  , "sc_x"    },
-    { ENGK_SC_Y  , "sc_y"    },
-    { ENGK_SC_Z  , "sc_z"    },
-    { ENGK_ANCH_X, "anch_x"  },
-    { ENGK_ANCH_Y, "anch_y"  },
-    { ENGK_ANCH_Z, "anch_z"  },
-    { ENGK_LX    , "laser_x" },
-    { ENGK_LY    , "laser_y" },
-    { ENGK_LZ    , "laser_z" },
-    { ENGK_SC    , "sc"      },
-    { ENGK_MSAA  , "msaa"    }
+    { ENGK_TR_X      , "tr_x"         },
+    { ENGK_TR_Y      , "tr_y"         },
+    { ENGK_TR_Z      , "tr_z"         },
+    { ENGK_ROT_X     , "rot_x"        },
+    { ENGK_ROT_Y     , "rot_y"        },
+    { ENGK_ROT_Z     , "rot_z"        },
+    { ENGK_SC_X      , "sc_x"         },
+    { ENGK_SC_Y      , "sc_y"         },
+    { ENGK_SC_Z      , "sc_z"         },
+    { ENGK_ANCH_X    , "anch_x"       },
+    { ENGK_ANCH_Y    , "anch_y"       },
+    { ENGK_ANCH_Z    , "anch_z"       },
+    { ENGK_LX        , "laser_x"      },
+    { ENGK_LY        , "laser_y"      },
+    { ENGK_LZ        , "laser_z"      },
+    { ENGK_SC        , "sc"           },
+    { ENGK_MSAA      , "msaa"         },
+    { ENGK_GRIP_VIS  , "grip_vis"     },
+    { ENGK_GRIP_TR_X , "grip_tr_x"    },
+    { ENGK_GRIP_TR_Y , "grip_tr_y"    },
+    { ENGK_GRIP_TR_Z , "grip_tr_z"    },
+    { ENGK_GRIP_ROT_X, "grip_rot_x"   },
+    { ENGK_GRIP_ROT_Y, "grip_rot_y"   },
+    { ENGK_GRIP_ROT_Z, "grip_rot_z"   },
+    { ENGK_GRIP_SC   , "grip_sc"      }
 };
 
 static const char *BOT_PREFIX = "BOT";
@@ -84,23 +100,32 @@ public:
     }
 
     //CAbstractGuiSettings
-    double getTranslationX() const final { return readGuiValue(ENGK_TR_X); }
-    double getTranslationY() const final { return readGuiValue(ENGK_TR_Y); }
-    double getTranslationZ() const final { return readGuiValue(ENGK_TR_Z); }
-    double getRotationX() const final { return readGuiValue(ENGK_ROT_X); }
-    double getRotationY() const final { return readGuiValue(ENGK_ROT_Y); }
-    double getRotationZ() const final { return readGuiValue(ENGK_ROT_Z); }
-    double getScaleX() const final { return readGuiValue(ENGK_SC_X); }
-    double getScaleY() const final { return readGuiValue(ENGK_SC_Y); }
-    double getScaleZ() const final { return readGuiValue(ENGK_SC_Z); }
-    double getAnchorX() const final { return readGuiValue(ENGK_ANCH_X); }
-    double getAnchorY() const final { return readGuiValue(ENGK_ANCH_Y); }
-    double getAnchorZ() const final { return readGuiValue(ENGK_ANCH_Z); }
-    double getLaserX() const final { return readGuiValue(ENGK_LX); }
-    double getLaserY() const final { return readGuiValue(ENGK_LY); }
-    double getLaserZ() const final { return readGuiValue(ENGK_LZ); }
-    double getScale() const final { return readGuiValue(ENGK_SC); }
-    GUI_TYPES::TMSAA getMsaa() const final { return static_cast <GUI_TYPES::TMSAA> (readGuiValue(ENGK_MSAA)); }
+    double getTranslationX() const final { return readGuiValue <double> (ENGK_TR_X); }
+    double getTranslationY() const final { return readGuiValue <double> (ENGK_TR_Y); }
+    double getTranslationZ() const final { return readGuiValue <double> (ENGK_TR_Z); }
+    double getRotationX() const final { return readGuiValue <double> (ENGK_ROT_X); }
+    double getRotationY() const final { return readGuiValue <double> (ENGK_ROT_Y); }
+    double getRotationZ() const final { return readGuiValue <double> (ENGK_ROT_Z); }
+    double getScaleX() const final { return readGuiValue <double> (ENGK_SC_X); }
+    double getScaleY() const final { return readGuiValue <double> (ENGK_SC_Y); }
+    double getScaleZ() const final { return readGuiValue <double> (ENGK_SC_Z); }
+    double getAnchorX() const final { return readGuiValue <double> (ENGK_ANCH_X); }
+    double getAnchorY() const final { return readGuiValue <double> (ENGK_ANCH_Y); }
+    double getAnchorZ() const final { return readGuiValue <double> (ENGK_ANCH_Z); }
+    double getLaserX() const final { return readGuiValue <double> (ENGK_LX); }
+    double getLaserY() const final { return readGuiValue <double> (ENGK_LY); }
+    double getLaserZ() const final { return readGuiValue <double> (ENGK_LZ); }
+    double getScale() const final { return readGuiValue <double> (ENGK_SC); }
+    GUI_TYPES::TMSAA getMsaa() const final { return readGuiValue <GUI_TYPES::TMSAA> (ENGK_MSAA); }
+    //for The Grip
+    bool isGripVisible() const final { return readGuiValue <bool> (ENGK_GRIP_VIS); }
+    double getGripTranslationX() const final { return readGuiValue <double> (ENGK_GRIP_TR_X); }
+    double getGripTranslationY() const final { return readGuiValue <double> (ENGK_GRIP_TR_Y); }
+    double getGripTranslationZ() const final { return readGuiValue <double> (ENGK_GRIP_TR_Z); }
+    double getGripRotationX() const final { return readGuiValue <double> (ENGK_GRIP_ROT_X); }
+    double getGripRotationY() const final { return readGuiValue <double> (ENGK_GRIP_ROT_Y); }
+    double getGripRotationZ() const final { return readGuiValue <double> (ENGK_GRIP_ROT_Z); }
+    double getGripScale() const final { return readGuiValue <double> (ENGK_GRIP_SC); }
 
     void setTranslationX(const double value) final { writeGuiValue(ENGK_TR_X, value); }
     void setTranslationY(const double value) final { writeGuiValue(ENGK_TR_Y, value); }
@@ -119,6 +144,15 @@ public:
     void setLaserZ(const double value) final { writeGuiValue(ENGK_LZ, value); }
     void setScale(const double value) final { writeGuiValue(ENGK_SC, value); }
     void setMsaa(const GUI_TYPES::TMSAA value) final { writeGuiValue(ENGK_MSAA, value); }
+    //for The Grip
+    void setGripVisible(const bool value) final { writeGuiValue(ENGK_GRIP_VIS, value); }
+    void setGripTranslationX(const double value) final { writeGuiValue(ENGK_GRIP_TR_X, value); }
+    void setGripTranslationY(const double value) final { writeGuiValue(ENGK_GRIP_TR_Y, value); }
+    void setGripTranslationZ(const double value) final { writeGuiValue(ENGK_GRIP_TR_Z, value); }
+    void setGripRotationX(const double value) final { writeGuiValue(ENGK_GRIP_ROT_X, value); }
+    void setGripRotationY(const double value) final { writeGuiValue(ENGK_GRIP_ROT_Y, value); }
+    void setGripRotationZ(const double value) final { writeGuiValue(ENGK_GRIP_ROT_Z, value); }
+    void setGripScale(const double value) final { writeGuiValue(ENGK_GRIP_SC, value); }
 
     //CAbstractBotSocketSettings
     uint32_t getLocalIpV4() const { return readIp(BOT_PREFIX, BOT_KEY_LCL_IP); }
@@ -127,22 +161,24 @@ public:
     uint16_t getRemoteBotUdpPort() const { return readIp(BOT_PREFIX, BOT_KEY_REM_PORT); }
 
 private:
-    double readGuiValue(const TGuiKey key) const {
-        double result = 0;
+    template <typename T>
+    T readGuiValue(const TGuiKey key) const {
+        T result = T();
         auto it = guiKeyMap.find(key);
         if (it != guiKeyMap.cend()) {
             settings->beginGroup(GUI_PREFIX);
-            result = settings->value(it->second).toDouble();
+            result = settings->value(it->second).value <T> ();
             settings->endGroup();
         }
         return result;
     }
 
-    void writeGuiValue(const TGuiKey key, const double value) {
+    template <typename T>
+    void writeGuiValue(const TGuiKey key, const T value) {
         auto it = guiKeyMap.find(key);
         if (it != guiKeyMap.cend()) {
             settings->beginGroup(GUI_PREFIX);
-            settings->setValue(it->second, QVariant(value));
+            settings->setValue(it->second, QVariant::fromValue <T> (value));
             settings->endGroup();
         }
     }

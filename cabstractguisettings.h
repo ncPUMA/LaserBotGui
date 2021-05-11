@@ -26,6 +26,15 @@ public:
     virtual double getLaserZ() const = 0;
     virtual double getScale() const = 0;
     virtual GUI_TYPES::TMSAA getMsaa() const = 0;
+    //for The Grip
+    virtual bool isGripVisible() const = 0;
+    virtual double getGripTranslationX() const = 0;
+    virtual double getGripTranslationY() const = 0;
+    virtual double getGripTranslationZ() const = 0;
+    virtual double getGripRotationX() const = 0;
+    virtual double getGripRotationY() const = 0;
+    virtual double getGripRotationZ() const = 0;
+    virtual double getGripScale() const = 0;
 
     virtual void setTranslationX(const double value) = 0;
     virtual void setTranslationY(const double value) = 0;
@@ -44,6 +53,15 @@ public:
     virtual void setLaserZ(const double value) = 0;
     virtual void setScale(const double value) = 0;
     virtual void setMsaa(const GUI_TYPES::TMSAA value) = 0;
+    //for The Grip
+    virtual void setGripVisible(const bool value) = 0;
+    virtual void setGripTranslationX(const double value) = 0;
+    virtual void setGripTranslationY(const double value) = 0;
+    virtual void setGripTranslationZ(const double value) = 0;
+    virtual void setGripRotationX(const double value) = 0;
+    virtual void setGripRotationY(const double value) = 0;
+    virtual void setGripRotationZ(const double value) = 0;
+    virtual void setGripScale(const double value) = 0;
 };
 
 #endif // CABSTRACTGUISETTINGS_H

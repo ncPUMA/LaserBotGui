@@ -62,6 +62,15 @@ public:
     double getLaserZ() const final { return 0; }
     double getScale() const final { return 0; }
     GUI_TYPES::TMSAA getMsaa() const final { return 0; }
+    //for The Grip
+    bool isGripVisible() const final { return false; }
+    double getGripTranslationX() const final { return 0; }
+    double getGripTranslationY() const final { return 0; }
+    double getGripTranslationZ() const final { return 0; }
+    double getGripRotationX() const final { return 0; }
+    double getGripRotationY() const final { return 0; }
+    double getGripRotationZ() const final { return 0; }
+    double getGripScale() const final { return 0; }
 
     void setTranslationX(const double) final { }
     void setTranslationY(const double) final { }
@@ -80,6 +89,15 @@ public:
     void setLaserZ(const double) final { }
     void setScale(const double) final { }
     void setMsaa(const GUI_TYPES::TMSAA) final { }
+    //for The Grip
+    void setGripVisible(const bool) final { }
+    void setGripTranslationX(const double) final { }
+    void setGripTranslationY(const double) final { }
+    void setGripTranslationZ(const double) final { }
+    void setGripRotationX(const double) final { }
+    void setGripRotationY(const double) final { }
+    void setGripRotationZ(const double) final { }
+    void setGripScale(const double) final { }
 };
 
 

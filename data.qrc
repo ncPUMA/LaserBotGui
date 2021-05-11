@@ -13,4 +13,7 @@
     <qresource prefix="/Styles">
         <file>Data/StyleSheets/style.qss</file>
     </qresource>
+    <qresource prefix="/Models">
+        <file>Data/Models/gripper_v1.step</file>
+    </qresource>
 </RCC>
