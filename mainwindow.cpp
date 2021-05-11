@@ -507,6 +507,15 @@ void MainWindow::slCallibApply()
     d_ptr->guiSettings->setLaserY(ui->dsbLaserY->value());
     d_ptr->guiSettings->setLaserZ(ui->dsbLaserZ->value());
     d_ptr->guiSettings->setScale(ui->dsbScale->value());
+    //for The Grip
+    d_ptr->guiSettings->setGripVisible(ui->checkGripVis->isChecked());
+    d_ptr->guiSettings->setGripTranslationX(ui->dsbGripTrX->value());
+    d_ptr->guiSettings->setGripTranslationY(ui->dsbGripTrY->value());
+    d_ptr->guiSettings->setGripTranslationZ(ui->dsbGripTrZ->value());
+    d_ptr->guiSettings->setGripRotationX(ui->dsbGripRtX->value());
+    d_ptr->guiSettings->setGripRotationY(ui->dsbGripRtY->value());
+    d_ptr->guiSettings->setGripRotationZ(ui->dsbGripRtZ->value());
+    d_ptr->guiSettings->setGripScale(ui->dsbGripScale->value());
 
 //    d_ptr->curModel = d_ptr->affinityTransform(d_ptr->curModel);
 
