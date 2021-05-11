@@ -25,8 +25,6 @@
 #include "ModelLoader/cmodelloaderfactorymethod.h"
 #include "ModelLoader/cabstractmodelloader.h"
 
-#include "Calibration/ccalibrationvertexdialog.h"
-
 #include "BotSocket/cabstractbotsocket.h"
 #include "cmodelmover.h"
 

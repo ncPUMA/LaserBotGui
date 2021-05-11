@@ -13,7 +13,6 @@ SOURCES += \
     BotSocket/cfanucbotsocket.cpp \
     BotSocket/fanucsocket.cpp \
     BotSocket/cbotsocketimitator.cpp \
-    Calibration/ccalibrationvertexdialog.cpp \
     ModelLoader/cabstractmodelloader.cpp \
     ModelLoader/cbreploader.cpp \
     ModelLoader/cigesloader.cpp \
@@ -39,7 +38,6 @@ HEADERS += \
     BotSocket/cabstractbotsocketsettings.h \
     BotSocket/cabstractui.h \
     BotSocket/cbotsocketimitator.h \
-    Calibration/ccalibrationvertexdialog.h \
     ModelLoader/cabstractmodelloader.h \
     ModelLoader/cbreploader.h \
     ModelLoader/cigesloader.h \
@@ -58,7 +56,6 @@ HEADERS += \
     mainwindow.h
 
 FORMS += \
-    Calibration/ccalibrationvertexdialog.ui \
     mainwindow.ui
 
 INCLUDEPATH += $$quote($$(CSF_OCCTIncludePath))
