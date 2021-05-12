@@ -3,6 +3,7 @@
 #include <math.h>
 #include <QTimer>
 #include <QSettings>
+#include <QtEndian>
 
 // fanuc structures
 #pragma pack(push, 1)
@@ -96,13 +97,39 @@ void FanucSocket::on_readyread()
         }
         assert(bytes_read == sizeof(s));
 
+        if(bigendian_)
+        {
+            s.time = qFromBigEndian(s.time);
+            s.attached = qFromBigEndian(s.attached);
+
+            s.w.x = qFromBigEndian(s.w.x);
+            s.w.y = qFromBigEndian(s.w.y);
+            s.w.z = qFromBigEndian(s.w.z);
+            s.w.w = qFromBigEndian(s.w.w);
+            s.w.p = qFromBigEndian(s.w.p);
+            s.w.r = qFromBigEndian(s.w.r);
+            s.w.config = qFromBigEndian(s.w.config);
+
+            s.u.x = qFromBigEndian(s.u.x);
+            s.u.y = qFromBigEndian(s.u.y);
+            s.u.z = qFromBigEndian(s.u.z);
+            s.u.w = qFromBigEndian(s.u.w);
+            s.u.p = qFromBigEndian(s.u.p);
+            s.u.r = qFromBigEndian(s.u.r);
+            s.u.config = qFromBigEndian(s.u.config);
+        }
         for(int i=0; i<9; i++)
+        {
+            if(bigendian_)
+                s.j.j[i] = qFromBigEndian(s.j.j[i]);
             s.j.j[i] = s.j.j[i] * 180/M_PI;
-//        qDebug("Pos: t=%f u=(%f, %f, %f, %f, %f, %f, %d) w=(%f, %f, %f, %f, %f, %f, %d) j=(%f, %f, %f, %f, %f, %f, %f, %f, %f)\n",
-//                     ((double)s.time)/1e6,
-//                     s.u.x, s.u.y, s.u.z, s.u.w, s.u.p, s.u.r, s.u.config,
-//                     s.w.x, s.w.y, s.w.z, s.w.w, s.w.p, s.w.r, s.w.config,
-//                     s.j.j[0], s.j.j[1], s.j.j[2], s.j.j[3], s.j.j[4], s.j.j[5], s.j.j[6], s.j.j[7], s.j.j[8]);
+        }
+
+        qDebug("Pos: t=%f att=%d, u=(%f, %f, %f, %f, %f, %f, %d) w=(%f, %f, %f, %f, %f, %f, %d) j=(%f, %f, %f, %f, %f, %f, %f, %f, %f)\n",
+                     ((double)s.time)/1e6, s.attached,
+                     s.u.x, s.u.y, s.u.z, s.u.w, s.u.p, s.u.r, s.u.config,
+                     s.w.x, s.w.y, s.w.z, s.w.w, s.w.p, s.w.r, s.w.config,
+                     s.j.j[0], s.j.j[1], s.j.j[2], s.j.j[3], s.j.j[4], s.j.j[5], s.j.j[6], s.j.j[7], s.j.j[8]);
     }
     //send last one
     FanucSocket::position pos{s.w.x - offset_.x,
@@ -135,6 +162,8 @@ void FanucSocket::start_connection()
         offset_.w = settings.value("offset_w",0).toFloat();
         offset_.p = settings.value("offset_p",0).toFloat();
         offset_.r = settings.value("offset_r",0).toFloat();
+
+        bigendian_ = settings.value("bigendian", false).toBool();
 
         QString host = settings.value("server_ip", "127.0.0.1").toString();
         int port = settings.value("server_port", 59002).toInt();
