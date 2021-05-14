@@ -33,10 +33,12 @@
 
 #include "cabstractguisettings.h"
 
-constexpr double DEGREE_K = M_PI / 180.;
+static constexpr double DEGREE_K = M_PI / 180.;
 
 static const Quantity_Color BG_CLR  = Quantity_Color(.7765,  .9, 1.  , Quantity_TOC_RGB);
 static const Quantity_Color TXT_CLR = Quantity_Color(  .15, .15, 0.15, Quantity_TOC_RGB);
+
+static constexpr int MAX_JRNL_ROW_COUNT = 15000;
 
 class CEmptyGuiSettings : public CAbstractGuiSettings
 {
@@ -382,6 +384,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Callib
     connect(ui->pbApplyCalib, SIGNAL(clicked(bool)), SLOT(slCallibApply()));
+
+    ui->teJrnl->document()->setMaximumBlockCount(MAX_JRNL_ROW_COUNT);
 }
 
 MainWindow::~MainWindow()
