@@ -21,6 +21,7 @@
 #include <AIS_ViewCube.hxx>
 #include <IntCurvesFace_ShapeIntersector.hxx>
 #include <Prs3d_DatumAspect.hxx>
+#include <Standard_Version.hxx>
 
 #include "ModelLoader/cmodelloaderfactorymethod.h"
 #include "ModelLoader/csteploader.h"
@@ -148,9 +149,14 @@ private:
 
         context = new AIS_InteractiveContext(viewer);
         Handle(Prs3d_DatumAspect) datum = context->DefaultDrawer()->DatumAspect();
+
+#if OCC_VERSION_HEX >= 0x070600
         datum->TextAspect(Prs3d_DatumParts_XAxis)->SetColor(TXT_CLR);
         datum->TextAspect(Prs3d_DatumParts_YAxis)->SetColor(TXT_CLR);
         datum->TextAspect(Prs3d_DatumParts_ZAxis)->SetColor(TXT_CLR);
+#else
+        datum->TextAspect()->SetColor(TXT_CLR);
+#endif
 
         viewer->AddZLayer(zLayerId);
         Graphic3d_ZLayerSettings settings = viewer->ZLayerSettings(zLayerId);
