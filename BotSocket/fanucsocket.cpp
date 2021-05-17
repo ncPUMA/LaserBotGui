@@ -145,12 +145,12 @@ void FanucSocket::on_readyread()
 //                     s.j.j[0], s.j.j[1], s.j.j[2], s.j.j[3], s.j.j[4], s.j.j[5], s.j.j[6], s.j.j[7], s.j.j[8]);
     }
     //send last one
-    FanucSocket::position pos{s.w.x - offset_.x,
-                              s.w.y - offset_.y,
-                              s.w.z - offset_.z,
-                              s.w.w - offset_.w,
-                              s.w.p - offset_.p,
-                              s.w.r - offset_.r};
+    FanucSocket::position pos{scale_.x * s.w.x - offset_.x,
+                              scale_.y * s.w.y - offset_.y,
+                              scale_.z * s.w.z - offset_.z,
+                              scale_.w * s.w.w - offset_.w,
+                              scale_.p * s.w.p - offset_.p,
+                              scale_.r * s.w.r - offset_.r};
     qDebug("{%f, %d, %f, %f, %f, %f, %f, %f},",
            ((double)s.time)/1e6, s.attached, pos.x, pos.y, pos.z, pos.w, pos.p, pos.r);
     emit position_received(pos);
@@ -168,6 +168,13 @@ void FanucSocket::start_connection()
        socket_.state() != QAbstractSocket::ConnectedState)
     {
         QSettings settings("fanuc.ini", QSettings::IniFormat);
+
+        scale_.x = settings.value("scale_x",1).toFloat();
+        scale_.y = settings.value("scale_y",1).toFloat();
+        scale_.z = settings.value("scale_z",1).toFloat();
+        scale_.w = settings.value("scale_w",1).toFloat();
+        scale_.p = settings.value("scale_p",1).toFloat();
+        scale_.r = settings.value("scale_r",1).toFloat();
 
         offset_.x = settings.value("offset_x",0).toFloat();
         offset_.y = settings.value("offset_y",0).toFloat();
