@@ -61,7 +61,11 @@ void CBotSocketImitator::slTmTimeout()
 {
     fanuc_imitation_pos pos = fanuc_imitation_data[d_ptr->imitation_data_idx];
     d_ptr->imitation_data_idx = (d_ptr->imitation_data_idx + 1) % fanuc_imitation_data_size;
-    d_ptr->attached = pos.attached;
+    if (d_ptr->attached != pos.attached)
+    {
+        d_ptr->attached = pos.attached;
+        stateChanged(d_ptr->attached ? BotSocket::ENSS_ATTACHED : BotSocket::ENSS_NOT_ATTACHED);
+    }
     transformModel(pos.x, pos.y, pos.z,
                    pos.w, pos.p, pos.r);
 
