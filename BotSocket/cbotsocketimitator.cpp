@@ -20,6 +20,7 @@ class CBotSocketImitatorPrivate
     double rx, ry, rz;
 
     size_t imitation_data_idx = 0;
+    bool attached = false;
 };
 
 CBotSocketImitator::CBotSocketImitator() :
@@ -53,13 +54,14 @@ void CBotSocketImitator::stopSocket()
 
 BotSocket::TSocketState CBotSocketImitator::socketState() const
 {
-    return BotSocket::ENSS_ATTACHED;
+    return d_ptr->attached ? BotSocket::ENSS_ATTACHED : BotSocket::ENSS_NOT_ATTACHED;
 }
 
 void CBotSocketImitator::slTmTimeout()
 {
     fanuc_imitation_pos pos = fanuc_imitation_data[d_ptr->imitation_data_idx];
     d_ptr->imitation_data_idx = (d_ptr->imitation_data_idx + 1) % fanuc_imitation_data_size;
+    d_ptr->attached = pos.attached;
     transformModel(pos.x, pos.y, pos.z,
                    pos.w, pos.p, pos.r);
 
