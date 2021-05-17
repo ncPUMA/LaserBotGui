@@ -23,6 +23,7 @@ SOURCES += \
     Primitives/cbotcross.cpp \
     Primitives/claservec.cpp \
     caspectwindow.cpp \
+    cguisettingswidget.cpp \
     cmainsettings.cpp \
     cmainviewport.cpp \
     cmodelmover.cpp \
@@ -49,6 +50,7 @@ HEADERS += \
     Primitives/claservec.h \
     cabstractguisettings.h \
     caspectwindow.h \
+    cguisettingswidget.h \
     cmainsettings.h \
     cmainviewport.h \
     cmodelmover.h \
@@ -56,6 +58,7 @@ HEADERS += \
     mainwindow.h
 
 FORMS += \
+    cguisettingswidget.ui \
     mainwindow.ui
 
 INCLUDEPATH += $$quote($$(CSF_OCCTIncludePath))

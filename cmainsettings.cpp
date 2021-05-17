@@ -14,68 +14,79 @@ enum EN_GuiKeys
 {
     ENGK_FIRST = 0,
 
-    ENGK_TR_X = ENGK_FIRST,
-    ENGK_TR_Y,
-    ENGK_TR_Z,
-    ENGK_ROT_X,
-    ENGK_ROT_Y,
-    ENGK_ROT_Z,
-    ENGK_SC_X,
-    ENGK_SC_Y,
-    ENGK_SC_Z,
-    ENGK_ANCH_X,
-    ENGK_ANCH_Y,
-    ENGK_ANCH_Z,
-    ENGK_LX,
-    ENGK_LY,
-    ENGK_LZ,
-    ENGK_SC,
-    ENGK_MSAA,
-    ENGK_GRIP_VIS,
+    ENGK_MSAA = ENGK_FIRST,
+
+    //The LaserBot
+    ENGK_BOT_ANCHOR_X,
+    ENGK_BOT_ANCHOR_Y,
+    ENGK_BOT_ANCHOR_Z,
+    ENGK_BOT_LASER_X,
+    ENGK_BOT_LASER_Y,
+    ENGK_BOT_LASER_Z,
+    ENGK_BOT_COORD_TYPE,
+
+    //The Part
+    ENGK_PART_TR_X,
+    ENGK_PART_TR_Y,
+    ENGK_PART_TR_Z,
+    ENGK_PART_CENTER_X,
+    ENGK_PART_CENTER_Y,
+    ENGK_PART_CENTER_Z,
+    ENGK_PART_ROTATE_X,
+    ENGK_PART_ROTATE_Y,
+    ENGK_PART_ROTATE_Z,
+    ENGK_PART_SCALE,
+
+    //The Grip
+    ENGK_GRIP_VISIBLE,
     ENGK_GRIP_TR_X,
     ENGK_GRIP_TR_Y,
     ENGK_GRIP_TR_Z,
-    ENGK_GRIP_ROT_X,
-    ENGK_GRIP_ROT_Y,
-    ENGK_GRIP_ROT_Z,
-    ENGK_GRIP_ANCH_X,
-    ENGK_GRIP_ANCH_Y,
-    ENGK_GRIP_ANCH_Z,
-    ENGK_GRIP_SC,
+    ENGK_GRIP_CENTER_X,
+    ENGK_GRIP_CENTER_Y,
+    ENGK_GRIP_CENTER_Z,
+    ENGK_GRIP_ROTATE_X,
+    ENGK_GRIP_ROTATE_Y,
+    ENGK_GRIP_ROTATE_Z,
+    ENGK_GRIP_SCALE,
 
     ENGK_LAST
 };
 typedef int TGuiKey;
 
 static const std::map <TGuiKey, QString> guiKeyMap = {
-    { ENGK_TR_X       , "tr_x"         },
-    { ENGK_TR_Y       , "tr_y"         },
-    { ENGK_TR_Z       , "tr_z"         },
-    { ENGK_ROT_X      , "rot_x"        },
-    { ENGK_ROT_Y      , "rot_y"        },
-    { ENGK_ROT_Z      , "rot_z"        },
-    { ENGK_SC_X       , "sc_x"         },
-    { ENGK_SC_Y       , "sc_y"         },
-    { ENGK_SC_Z       , "sc_z"         },
-    { ENGK_ANCH_X     , "anch_x"       },
-    { ENGK_ANCH_Y     , "anch_y"       },
-    { ENGK_ANCH_Z     , "anch_z"       },
-    { ENGK_LX         , "laser_x"      },
-    { ENGK_LY         , "laser_y"      },
-    { ENGK_LZ         , "laser_z"      },
-    { ENGK_SC         , "sc"           },
-    { ENGK_MSAA       , "msaa"         },
-    { ENGK_GRIP_VIS   , "grip_vis"     },
-    { ENGK_GRIP_TR_X  , "grip_tr_x"    },
-    { ENGK_GRIP_TR_Y  , "grip_tr_y"    },
-    { ENGK_GRIP_TR_Z  , "grip_tr_z"    },
-    { ENGK_GRIP_ROT_X , "grip_rot_x"   },
-    { ENGK_GRIP_ROT_Y , "grip_rot_y"   },
-    { ENGK_GRIP_ROT_Z , "grip_rot_z"   },
-    { ENGK_GRIP_ANCH_X, "grip_anch_x"       },
-    { ENGK_GRIP_ANCH_Y, "grip_anch_y"       },
-    { ENGK_GRIP_ANCH_Z, "grip_anch_z"       },
-    { ENGK_GRIP_SC    , "grip_sc"      }
+    { ENGK_MSAA          , "msaa"           },
+    //The LaserBot
+    { ENGK_BOT_ANCHOR_X  , "bot_anch_x"     },
+    { ENGK_BOT_ANCHOR_Y  , "bot_anch_y"     },
+    { ENGK_BOT_ANCHOR_Z  , "bot_anch_z"     },
+    { ENGK_BOT_LASER_X   , "bot_lsr_x"      },
+    { ENGK_BOT_LASER_Y   , "bot_lsr_y"      },
+    { ENGK_BOT_LASER_Z   , "bot_lsr_z"      },
+    { ENGK_BOT_COORD_TYPE, "bot_coord_type" },
+    //The Part
+    { ENGK_PART_TR_X     , "part_tr_x"      },
+    { ENGK_PART_TR_Y     , "part_tr_y"      },
+    { ENGK_PART_TR_Z     , "part_tr_z"      },
+    { ENGK_PART_CENTER_X , "part_center_x"  },
+    { ENGK_PART_CENTER_Y , "part_center_y"  },
+    { ENGK_PART_CENTER_Z , "part_center_z"  },
+    { ENGK_PART_ROTATE_X , "part_rotate_x"  },
+    { ENGK_PART_ROTATE_Y , "part_rotate_y"  },
+    { ENGK_PART_ROTATE_Z , "part_rotate_z"  },
+    { ENGK_PART_SCALE    , "part_scale"     },
+    //The Grip
+    { ENGK_GRIP_VISIBLE  , "grip_visible"   },
+    { ENGK_GRIP_TR_X     , "grip_tr_x"      },
+    { ENGK_GRIP_TR_Y     , "grip_tr_y"      },
+    { ENGK_GRIP_TR_Z     , "grip_tr_z"      },
+    { ENGK_GRIP_CENTER_X , "grip_center_x"  },
+    { ENGK_GRIP_CENTER_Y , "grip_center_y"  },
+    { ENGK_GRIP_CENTER_Z , "grip_center_z"  },
+    { ENGK_GRIP_ROTATE_X , "grip_rotate_x"  },
+    { ENGK_GRIP_ROTATE_Y , "grip_rotate_y"  },
+    { ENGK_GRIP_ROTATE_Z , "grip_rotate_z"  },
+    { ENGK_GRIP_SCALE    , "grip_scale"     },
 };
 
 static const char *BOT_PREFIX = "BOT";
@@ -105,68 +116,81 @@ public:
         delete settings;
     }
 
+//CAbstractGuiSettings
     //CAbstractGuiSettings
-    double getTranslationX() const final { return readGuiValue <double> (ENGK_TR_X); }
-    double getTranslationY() const final { return readGuiValue <double> (ENGK_TR_Y); }
-    double getTranslationZ() const final { return readGuiValue <double> (ENGK_TR_Z); }
-    double getRotationX() const final { return readGuiValue <double> (ENGK_ROT_X); }
-    double getRotationY() const final { return readGuiValue <double> (ENGK_ROT_Y); }
-    double getRotationZ() const final { return readGuiValue <double> (ENGK_ROT_Z); }
-    double getScaleX() const final { return readGuiValue <double> (ENGK_SC_X); }
-    double getScaleY() const final { return readGuiValue <double> (ENGK_SC_Y); }
-    double getScaleZ() const final { return readGuiValue <double> (ENGK_SC_Z); }
-    double getAnchorX() const final { return readGuiValue <double> (ENGK_ANCH_X); }
-    double getAnchorY() const final { return readGuiValue <double> (ENGK_ANCH_Y); }
-    double getAnchorZ() const final { return readGuiValue <double> (ENGK_ANCH_Z); }
-    double getLaserX() const final { return readGuiValue <double> (ENGK_LX); }
-    double getLaserY() const final { return readGuiValue <double> (ENGK_LY); }
-    double getLaserZ() const final { return readGuiValue <double> (ENGK_LZ); }
-    double getScale() const final { return readGuiValue <double> (ENGK_SC); }
     GUI_TYPES::TMSAA getMsaa() const final { return readGuiValue <GUI_TYPES::TMSAA> (ENGK_MSAA); }
-    //for The Grip
-    bool isGripVisible() const final { return readGuiValue <bool> (ENGK_GRIP_VIS); }
-    double getGripTranslationX() const final { return readGuiValue <double> (ENGK_GRIP_TR_X); }
-    double getGripTranslationY() const final { return readGuiValue <double> (ENGK_GRIP_TR_Y); }
-    double getGripTranslationZ() const final { return readGuiValue <double> (ENGK_GRIP_TR_Z); }
-    double getGripRotationX() const final { return readGuiValue <double> (ENGK_GRIP_ROT_X); }
-    double getGripRotationY() const final { return readGuiValue <double> (ENGK_GRIP_ROT_Y); }
-    double getGripRotationZ() const final { return readGuiValue <double> (ENGK_GRIP_ROT_Z); }
-    double getGripAnchorX() const final { return readGuiValue <double> (ENGK_GRIP_ANCH_X); }
-    double getGripAnchorY() const final { return readGuiValue <double> (ENGK_GRIP_ANCH_Y); }
-    double getGripAnchorZ() const final { return readGuiValue <double> (ENGK_GRIP_ANCH_Z); }
-    double getGripScale() const final { return readGuiValue <double> (ENGK_GRIP_SC); }
-
-    void setTranslationX(const double value) final { writeGuiValue(ENGK_TR_X, value); }
-    void setTranslationY(const double value) final { writeGuiValue(ENGK_TR_Y, value); }
-    void setTranslationZ(const double value) final { writeGuiValue(ENGK_TR_Z, value); }
-    void setRotationX(const double value) final { writeGuiValue(ENGK_ROT_X, value); }
-    void setRotationY(const double value) final { writeGuiValue(ENGK_ROT_Y, value); }
-    void setRotationZ(const double value) final { writeGuiValue(ENGK_ROT_Z, value); }
-    void setScaleX(const double value) final { writeGuiValue(ENGK_SC_X, value); }
-    void setScaleY(const double value) final { writeGuiValue(ENGK_SC_Y, value); }
-    void setScaleZ(const double value) final { writeGuiValue(ENGK_SC_Z, value); }
-    void setAnchorX(const double value) final { writeGuiValue(ENGK_ANCH_X, value); }
-    void setAnchorY(const double value) final { writeGuiValue(ENGK_ANCH_Y, value); }
-    void setAnchorZ(const double value) final { writeGuiValue(ENGK_ANCH_Z, value); }
-    void setLaserX(const double value) final { writeGuiValue(ENGK_LX, value); }
-    void setLaserY(const double value) final { writeGuiValue(ENGK_LY, value); }
-    void setLaserZ(const double value) final { writeGuiValue(ENGK_LZ, value); }
-    void setScale(const double value) final { writeGuiValue(ENGK_SC, value); }
     void setMsaa(const GUI_TYPES::TMSAA value) final { writeGuiValue(ENGK_MSAA, value); }
-    //for The Grip
-    void setGripVisible(const bool value) final { writeGuiValue(ENGK_GRIP_VIS, value); }
-    void setGripTranslationX(const double value) final { writeGuiValue(ENGK_GRIP_TR_X, value); }
-    void setGripTranslationY(const double value) final { writeGuiValue(ENGK_GRIP_TR_Y, value); }
-    void setGripTranslationZ(const double value) final { writeGuiValue(ENGK_GRIP_TR_Z, value); }
-    void setGripRotationX(const double value) final { writeGuiValue(ENGK_GRIP_ROT_X, value); }
-    void setGripRotationY(const double value) final { writeGuiValue(ENGK_GRIP_ROT_Y, value); }
-    void setGripRotationZ(const double value) final { writeGuiValue(ENGK_GRIP_ROT_Z, value); }
-    void setGripAnchorX(const double value) final { writeGuiValue(ENGK_GRIP_ANCH_X, value); }
-    void setGripAnchorY(const double value) final { writeGuiValue(ENGK_GRIP_ANCH_Y, value); }
-    void setGripAnchorZ(const double value) final { writeGuiValue(ENGK_GRIP_ANCH_Z, value); }
-    void setGripScale(const double value) final { writeGuiValue(ENGK_GRIP_SC, value); }
 
-    //CAbstractBotSocketSettings
+    //The LaserBot
+    double getBotAnchorX() const final { return readGuiValue <double> (ENGK_BOT_ANCHOR_X); }
+    double getBotAnchorY() const final { return readGuiValue <double> (ENGK_BOT_ANCHOR_Y); }
+    double getBotAnchorZ() const final { return readGuiValue <double> (ENGK_BOT_ANCHOR_Z); }
+    double getBotLaserX() const final { return readGuiValue <double> (ENGK_BOT_LASER_X); }
+    double getBotLaserY() const final { return readGuiValue <double> (ENGK_BOT_LASER_Y); }
+    double getBotLaserZ() const final { return readGuiValue <double> (ENGK_BOT_LASER_Z); }
+    GUI_TYPES::TCoordSystem getBotCoordType() const  final {
+        return readGuiValue <GUI_TYPES::TCoordSystem> (ENGK_BOT_COORD_TYPE);
+    }
+
+    void setBotAnchorX(const double value) final { writeGuiValue(ENGK_BOT_ANCHOR_X, value); }
+    void setBotAnchorY(const double value) final { writeGuiValue(ENGK_BOT_ANCHOR_Y, value); }
+    void setBotAnchorZ(const double value) final { writeGuiValue(ENGK_BOT_ANCHOR_Z, value); }
+    void setBotLaserX(const double value) final { writeGuiValue(ENGK_BOT_LASER_X, value); }
+    void setBotLaserY(const double value) final { writeGuiValue(ENGK_BOT_LASER_Y, value); }
+    void setBotLaserZ(const double value) final { writeGuiValue(ENGK_BOT_LASER_Z, value); }
+    void setBotCoordType(const GUI_TYPES::TCoordSystem value) final {
+        writeGuiValue(ENGK_BOT_COORD_TYPE, value);
+    }
+
+    //The Part
+    double getPartTrX() const final { return readGuiValue <double> (ENGK_PART_TR_X); }
+    double getPartTrY() const final { return readGuiValue <double> (ENGK_PART_TR_Y); }
+    double getPartTrZ() const final { return readGuiValue <double> (ENGK_PART_TR_Z); }
+    double getPartCenterX() const final { return readGuiValue <double> (ENGK_PART_CENTER_X); }
+    double getPartCenterY() const final { return readGuiValue <double> (ENGK_PART_CENTER_Y); }
+    double getPartCenterZ() const final { return readGuiValue <double> (ENGK_PART_CENTER_Z); }
+    double getPartRotationX() const final { return readGuiValue <double> (ENGK_PART_ROTATE_X); }
+    double getPartRotationY() const final { return readGuiValue <double> (ENGK_PART_ROTATE_Y); }
+    double getPartRotationZ() const final { return readGuiValue <double> (ENGK_PART_ROTATE_Z); }
+    double getPartScale() const final { return readGuiValue <double> (ENGK_PART_SCALE); }
+
+    void setPartTrX(const double value) final { writeGuiValue(ENGK_PART_TR_X, value); }
+    void setPartTrY(const double value) final { writeGuiValue(ENGK_PART_TR_Y, value); }
+    void setPartTrZ(const double value) final { writeGuiValue(ENGK_PART_TR_Z, value); }
+    void setPartCenterX(const double value) final { writeGuiValue(ENGK_PART_CENTER_X, value); }
+    void setPartCenterY(const double value) final { writeGuiValue(ENGK_PART_CENTER_Y, value); }
+    void setPartCenterZ(const double value) final { writeGuiValue(ENGK_PART_CENTER_Z, value); }
+    void setPartRotationX(const double value) final { writeGuiValue(ENGK_PART_ROTATE_X, value); }
+    void setPartRotationY(const double value) final { writeGuiValue(ENGK_PART_ROTATE_Y, value); }
+    void setPartRotationZ(const double value) final { writeGuiValue(ENGK_PART_ROTATE_Z, value); }
+    void setPartScale(const double value) final { writeGuiValue(ENGK_PART_SCALE, value); }
+
+    //The Grip
+    bool   isGripVisible() const final { return readGuiValue <bool> (ENGK_GRIP_VISIBLE); }
+    double getGripTrX() const final { return readGuiValue <double> (ENGK_GRIP_TR_X); }
+    double getGripTrY() const final { return readGuiValue <double> (ENGK_GRIP_TR_Y); }
+    double getGripTrZ() const final { return readGuiValue <double> (ENGK_GRIP_TR_Z); }
+    double getGripCenterX() const final { return readGuiValue <double> (ENGK_GRIP_CENTER_X); }
+    double getGripCenterY() const final { return readGuiValue <double> (ENGK_GRIP_CENTER_Y); }
+    double getGripCenterZ() const final { return readGuiValue <double> (ENGK_GRIP_CENTER_Z); }
+    double getGripRotationX() const final { return readGuiValue <double> (ENGK_GRIP_ROTATE_X); }
+    double getGripRotationY() const final { return readGuiValue <double> (ENGK_GRIP_ROTATE_Y); }
+    double getGripRotationZ() const final { return readGuiValue <double> (ENGK_GRIP_ROTATE_Z); }
+    double getGripScale() const final { return readGuiValue <double> (ENGK_GRIP_SCALE); }
+
+    void setGripVisible(const bool value) final { writeGuiValue(ENGK_GRIP_VISIBLE, value); }
+    void setGripTrX(const double value) final { writeGuiValue(ENGK_GRIP_TR_X, value); }
+    void setGripTrY(const double value) final { writeGuiValue(ENGK_GRIP_TR_Y, value); }
+    void setGripTrZ(const double value) final { writeGuiValue(ENGK_GRIP_TR_Z, value); }
+    void setGripCenterX(const double value) final { writeGuiValue(ENGK_GRIP_CENTER_X, value); }
+    void setGripCenterY(const double value) final { writeGuiValue(ENGK_GRIP_CENTER_Y, value); }
+    void setGripCenterZ(const double value) final { writeGuiValue(ENGK_GRIP_CENTER_Z, value); }
+    void setGripRotationX(const double value) final { writeGuiValue(ENGK_GRIP_ROTATE_X, value); }
+    void setGripRotationY(const double value) final { writeGuiValue(ENGK_GRIP_ROTATE_Y, value); }
+    void setGripRotationZ(const double value) final { writeGuiValue(ENGK_GRIP_ROTATE_Z, value); }
+    void setGripScale(const double value) final { writeGuiValue(ENGK_GRIP_SCALE, value); }
+
+//CAbstractBotSocketSettings
     uint32_t getLocalIpV4() const { return readIp(BOT_PREFIX, BOT_KEY_LCL_IP); }
     uint16_t getLocalUdpPort() const { return readIp(BOT_PREFIX, BOT_KEY_LCL_PORT); }
     uint32_t getRemoteBotIpV4() const { return readIp(BOT_PREFIX, BOT_KEY_REM_IP); }
