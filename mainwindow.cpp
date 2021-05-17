@@ -56,8 +56,9 @@ protected:
 
 
 static const Standard_Integer Z_LAYER = 100;
-
+static const V3d_TypeOfOrientation DEFAULT_ORIENTATION = V3d_XposYposZpos;
 class CModelMover;
+
 
 class MainWindowPrivate
 {
@@ -76,7 +77,7 @@ private:
     void init(OpenGl_GraphicDriver &driver) {
         viewer = new V3d_Viewer(&driver);
         viewer->SetDefaultViewSize(1000.);
-        viewer->SetDefaultViewProj(V3d_XposYnegZpos);
+        viewer->SetDefaultViewProj(DEFAULT_ORIENTATION);
         viewer->SetComputedMode(Standard_True);
         viewer->SetDefaultComputedMode(Standard_True);
         viewer->SetDefaultLights();
@@ -455,7 +456,7 @@ void MainWindow::setSettings(CAbstractGuiSettings &settings)
 
     ui->wSettings->initFromGuiSettings(settings);
 
-    V3d_TypeOfOrientation orientation = V3d_XposYnegZpos;
+    V3d_TypeOfOrientation orientation = DEFAULT_ORIENTATION;
     if (d_ptr->guiSettings->getBotCoordType() == GUI_TYPES::ENCS_LEFT)
         orientation = V3d_XposYnegZneg;
     if (d_ptr->viewer->DefaultViewProj() != orientation) {
@@ -606,7 +607,7 @@ void MainWindow::slCallibApply()
 {
     ui->wSettings->applyToGuiSettings(*d_ptr->guiSettings);
 
-    V3d_TypeOfOrientation orientation = V3d_XposYnegZpos;
+    V3d_TypeOfOrientation orientation = DEFAULT_ORIENTATION;
     if (d_ptr->guiSettings->getBotCoordType() == GUI_TYPES::ENCS_LEFT)
         orientation = V3d_XposYnegZneg;
     if (d_ptr->viewer->DefaultViewProj() != orientation) {
