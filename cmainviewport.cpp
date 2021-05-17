@@ -118,6 +118,15 @@ void CMainViewport::setBackgroundColor(const Quantity_Color &clr)
     d_ptr->v3dView->SetBackgroundColor(clr);
 }
 
+void CMainViewport::setCoord(const GUI_TYPES::TCoordSystem type)
+{
+    V3d_TypeOfOrientation orientation = V3d_XposYnegZpos;
+    if (type == GUI_TYPES::ENCS_LEFT)
+        orientation = V3d_XposYnegZneg;
+    d_ptr->v3dView->SetProj(orientation, Standard_False);
+    d_ptr->v3dView->Redraw();
+}
+
 QPaintEngine *CMainViewport::paintEngine() const
 {
     return nullptr;

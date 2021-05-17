@@ -449,6 +449,14 @@ void MainWindow::setSettings(CAbstractGuiSettings &settings)
 
     ui->wSettings->initFromGuiSettings(settings);
 
+    V3d_TypeOfOrientation orientation = V3d_XposYnegZpos;
+    if (d_ptr->guiSettings->getBotCoordType() == GUI_TYPES::ENCS_LEFT)
+        orientation = V3d_XposYnegZneg;
+    if (d_ptr->viewer->DefaultViewProj() != orientation) {
+        d_ptr->viewer->SetDefaultViewProj(orientation);
+        ui->mainView->setCoord(d_ptr->guiSettings->getBotCoordType());
+    }
+
     d_ptr->updateModelsDefaultPosition(ui->actionShading->isChecked());
     d_ptr->reDrawScene();
 }
@@ -591,6 +599,14 @@ void MainWindow::slClearJrnl()
 void MainWindow::slCallibApply()
 {
     ui->wSettings->applyToGuiSettings(*d_ptr->guiSettings);
+
+    V3d_TypeOfOrientation orientation = V3d_XposYnegZpos;
+    if (d_ptr->guiSettings->getBotCoordType() == GUI_TYPES::ENCS_LEFT)
+        orientation = V3d_XposYnegZneg;
+    if (d_ptr->viewer->DefaultViewProj() != orientation) {
+        d_ptr->viewer->SetDefaultViewProj(orientation);
+        ui->mainView->setCoord(d_ptr->guiSettings->getBotCoordType());
+    }
 
     d_ptr->updateModelsDefaultPosition(ui->actionShading->isChecked());
     d_ptr->reDrawScene();

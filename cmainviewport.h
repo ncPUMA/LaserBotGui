@@ -22,6 +22,7 @@ public:
     void setStatsVisible(const bool value);
     void fitInView();
     void setBackgroundColor(const Quantity_Color &clr);
+    void setCoord(const GUI_TYPES::TCoordSystem type);
 
 protected:
     QPaintEngine* paintEngine() const final;
