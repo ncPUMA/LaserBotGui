@@ -22,6 +22,8 @@
 #include <AIS_ViewCube.hxx>
 #include <IntCurvesFace_ShapeIntersector.hxx>
 #include <Prs3d_DatumAspect.hxx>
+#include <Standard_Version.hxx>
+#include <gp_Quaternion.hxx>
 
 #include "ModelLoader/cmodelloaderfactorymethod.h"
 #include "ModelLoader/csteploader.h"
@@ -55,8 +57,9 @@ protected:
 
 
 static const Standard_Integer Z_LAYER = 100;
-
+static const V3d_TypeOfOrientation DEFAULT_ORIENTATION = V3d_XposYposZpos;
 class CModelMover;
+
 
 class MainWindowPrivate
 {
@@ -75,7 +78,7 @@ private:
     void init(OpenGl_GraphicDriver &driver) {
         viewer = new V3d_Viewer(&driver);
         viewer->SetDefaultViewSize(1000.);
-        viewer->SetDefaultViewProj(V3d_XposYnegZpos);
+        viewer->SetDefaultViewProj(DEFAULT_ORIENTATION);
         viewer->SetComputedMode(Standard_True);
         viewer->SetDefaultComputedMode(Standard_True);
         viewer->SetDefaultLights();
@@ -83,9 +86,14 @@ private:
 
         context = new AIS_InteractiveContext(viewer);
         Handle(Prs3d_DatumAspect) datum = context->DefaultDrawer()->DatumAspect();
+
+#if OCC_VERSION_HEX >= 0x070600
         datum->TextAspect(Prs3d_DatumParts_XAxis)->SetColor(TXT_CLR);
         datum->TextAspect(Prs3d_DatumParts_YAxis)->SetColor(TXT_CLR);
         datum->TextAspect(Prs3d_DatumParts_ZAxis)->SetColor(TXT_CLR);
+#else
+        datum->TextAspect()->SetColor(TXT_CLR);
+#endif
 
         viewer->AddZLayer(zLayerId);
         Graphic3d_ZLayerSettings settings = viewer->ZLayerSettings(zLayerId);
@@ -100,6 +108,58 @@ private:
             CStepLoader loader;
             gripModel = loader.loadFromBinaryData(stepData.constData(), static_cast <size_t> (stepData.size()));
         }
+
+        QFile defaultModelFile(":/Models/Data/Models/turbine_blade.stp");
+        if (defaultModelFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            const QByteArray stepData = defaultModelFile.readAll();
+            CStepLoader loader;
+            curModel = loader.loadFromBinaryData(stepData.constData(), static_cast <size_t> (stepData.size()));
+        }
+    }
+
+    static gp_Trsf calc_transform(const gp_Trsf &base_transform,
+                                  const gp_Vec &model_translation,
+                                  const gp_Vec &model_center,
+                                  double scaleFactor,
+                                  double alpha_off, double beta_off, double gamma_off,
+                                  double alpha_cur = 0.0, double beta_cur = 0.0, double gamma_cur = 0.0) {
+        gp_Trsf trsfTr3 = base_transform;
+        trsfTr3.SetTranslation(model_translation + model_center);
+
+        gp_Trsf trsfSc = base_transform;
+        if (scaleFactor == 0.)
+            scaleFactor = 1.;
+        trsfSc.SetScale(gp_Pnt(), scaleFactor);
+
+        gp_Trsf trsfTr2 = base_transform;
+        trsfTr2.SetTranslation(model_center);
+
+        gp_Trsf trsfRoff = base_transform;
+        gp_Quaternion qoff;
+        qoff.SetEulerAngles(gp_Extrinsic_XYZ,
+                         alpha_off * DEGREE_K,
+                         beta_off  * DEGREE_K,
+                         gamma_off * DEGREE_K);
+        trsfRoff.SetRotation(qoff);
+
+        gp_Trsf trsfRcur = base_transform;
+        gp_Quaternion qcur;
+        qcur.SetEulerAngles(gp_Extrinsic_XYZ,
+                         alpha_cur * DEGREE_K,
+                         beta_cur  * DEGREE_K,
+                         gamma_cur * DEGREE_K);
+        trsfRcur.SetRotation(qcur);
+
+        gp_Trsf trsfTr1 = base_transform;
+        trsfTr1.SetTranslation(-model_center);
+
+        return trsfTr3 *
+               trsfSc *
+               trsfTr2 *
+               trsfRcur *
+               trsfRoff *
+               trsfTr1;
     }
 
     void updateModelsDefaultPosition(const bool shading) {
@@ -123,69 +183,46 @@ private:
 
         //The Part
         {
-            gp_Trsf trsfTr = curModel.Location().Transformation();
-            const gp_Vec translation(guiSettings->getPartTrX(),
-                                     guiSettings->getPartTrY(),
-                                     guiSettings->getPartTrZ());
-            trsfTr.SetTranslation(translation);
+            gp_Trsf loc = calc_transform(curModel.Location().Transformation(),
+                                         gp_Vec(guiSettings->getPartTrX(),
+                                                guiSettings->getPartTrY(),
+                                                guiSettings->getPartTrZ()),
+                                         gp_Vec(guiSettings->getPartCenterX(),
+                                                guiSettings->getPartCenterY(),
+                                                guiSettings->getPartCenterZ()),
+                                         guiSettings->getPartScale(),
+                                         guiSettings->getPartRotationX(),
+                                         guiSettings->getPartRotationY(),
+                                         guiSettings->getPartRotationZ());
 
-            const gp_Pnt localAnchor(guiSettings->getPartCenterX(),
-                                     guiSettings->getPartCenterY(),
-                                     guiSettings->getPartCenterZ());
-            gp_Trsf trsfLRX = curModel.Location().Transformation();
-            trsfLRX.SetRotation(gp_Ax1(localAnchor, gp_Dir(1.,0.,0.)),
-                                guiSettings->getPartRotationX() * DEGREE_K);
-            gp_Trsf trsfLRY = curModel.Location().Transformation();
-            trsfLRY.SetRotation(gp_Ax1(localAnchor, gp_Dir(0.,1.,0.)),
-                                guiSettings->getPartRotationY() * DEGREE_K);
-            gp_Trsf trsfLRZ = curModel.Location().Transformation();
-            trsfLRZ.SetRotation(gp_Ax1(localAnchor, gp_Dir(0.,0.,1.)),
-                                guiSettings->getPartRotationZ() * DEGREE_K);
-
-            gp_Trsf trsfSc = curModel.Location().Transformation();
-            double scaleFactor = guiSettings->getPartScale();
-            if (scaleFactor == 0.)
-                scaleFactor = 1.;
-            trsfSc.SetScale(localAnchor, scaleFactor);
 
             ais_mdl = new AIS_Shape(curModel);
             context->SetDisplayMode(ais_mdl, shading ? 1 : 0, Standard_False);
             context->Display(ais_mdl, Standard_False);
-            context->SetLocation(ais_mdl, trsfTr * trsfLRX * trsfLRY * trsfLRZ * trsfSc);
+            context->SetLocation(ais_mdl, loc);
         }
 
         //The Grip
         {
-            gp_Trsf trsfTr = gripModel.Location().Transformation();
-            const gp_Vec translation(guiSettings->getGripTrX(),
-                                     guiSettings->getGripTrY(),
-                                     guiSettings->getGripTrZ());
-            trsfTr.SetTranslation(translation);
-
-            const gp_Pnt localAnchor(guiSettings->getGripCenterX(),
-                                     guiSettings->getGripCenterY(),
-                                     guiSettings->getGripCenterZ());
-            gp_Trsf trsfLRX = gripModel.Location().Transformation();
-            trsfLRX.SetRotation(gp_Ax1(localAnchor, gp_Dir(1.,0.,0.)),
-                                guiSettings->getGripRotationX() * DEGREE_K);
-            gp_Trsf trsfLRY = gripModel.Location().Transformation();
-            trsfLRY.SetRotation(gp_Ax1(localAnchor, gp_Dir(0.,1.,0.)),
-                                guiSettings->getGripRotationY() * DEGREE_K);
-            gp_Trsf trsfLRZ = gripModel.Location().Transformation();
-            trsfLRZ.SetRotation(gp_Ax1(localAnchor, gp_Dir(0.,0.,1.)),
-                                guiSettings->getGripRotationZ() * DEGREE_K);
-
-            gp_Trsf trsfSc = gripModel.Location().Transformation();
-            double scaleFactor = guiSettings->getGripScale();
-            if (scaleFactor == 0.)
-                scaleFactor = 1.;
-            trsfSc.SetScale(localAnchor, scaleFactor);
+            gp_Trsf loc = calc_transform(gripModel.Location().Transformation(),
+                                         gp_Vec(guiSettings->getGripTrX(),
+                                                guiSettings->getGripTrY(),
+                                                guiSettings->getGripTrZ()),
+                                         gp_Vec(guiSettings->getGripCenterX(),
+                                                guiSettings->getGripCenterY(),
+                                                guiSettings->getGripCenterZ()),
+                                         guiSettings->getGripScale(),
+                                         guiSettings->getGripRotationX(),
+                                         guiSettings->getGripRotationY(),
+                                         guiSettings->getGripRotationZ());
 
             if (guiSettings->isGripVisible()) {
                 ais_grip = new AIS_Shape(gripModel);
                 context->SetDisplayMode(ais_grip, shading ? 1 : 0, Standard_False);
+                context->SetColor(ais_grip, Quantity_Color(Quantity_NOC_TOMATO3), Standard_False);
+                context->SetWidth(ais_grip, 30, Standard_False);
                 context->Display(ais_grip, Standard_False);
-                context->SetLocation(ais_grip, trsfTr * trsfLRX * trsfLRY * trsfLRZ * trsfSc);
+                context->SetLocation(ais_grip, loc);
             }
         }
 
@@ -227,97 +264,46 @@ private:
     }
 
     void reDrawScene() {
-        const gp_Pnt globalAnchor(guiSettings->getBotAnchorX(),
-                                  guiSettings->getBotAnchorY(),
-                                  guiSettings->getBotAnchorZ());
         //The Part
-        if(!ais_mdl.IsNull())
+        if(!ais_mdl.IsNull() && draw_model)
         {
-            gp_Trsf trsfTr = curModel.Location().Transformation();
-            const gp_Vec translation(guiSettings->getPartTrX() + mdlMover.getTrX(),
-                                     guiSettings->getPartTrY() + mdlMover.getTrY(),
-                                     guiSettings->getPartTrZ() + mdlMover.getTrZ());
-            trsfTr.SetTranslation(translation);
+            gp_Trsf loc = calc_transform(curModel.Location().Transformation(),
+                                         gp_Vec(guiSettings->getPartTrX() + mdlMover.getTrX(),
+                                                guiSettings->getPartTrY() + mdlMover.getTrY(),
+                                                guiSettings->getPartTrZ() + mdlMover.getTrZ()),
+                                         gp_Vec(guiSettings->getPartCenterX(),
+                                                guiSettings->getPartCenterY(),
+                                                guiSettings->getPartCenterZ()),
+                                         guiSettings->getPartScale(),
+                                         guiSettings->getPartRotationX(),
+                                         guiSettings->getPartRotationY(),
+                                         guiSettings->getPartRotationZ(),
+                                         mdlMover.getRX(),
+                                         mdlMover.getRY(),
+                                         mdlMover.getRZ());
 
-            const gp_Pnt localAnchor(guiSettings->getPartCenterX(),
-                                     guiSettings->getPartCenterY(),
-                                     guiSettings->getPartCenterZ());
-            gp_Trsf trsfLRX = curModel.Location().Transformation();
-            trsfLRX.SetRotation(gp_Ax1(localAnchor, gp_Dir(1.,0.,0.)),
-                                guiSettings->getPartRotationX() * DEGREE_K);
-            gp_Trsf trsfLRY = curModel.Location().Transformation();
-            trsfLRY.SetRotation(gp_Ax1(localAnchor, gp_Dir(0.,1.,0.)),
-                                guiSettings->getPartRotationY() * DEGREE_K);
-            gp_Trsf trsfLRZ = curModel.Location().Transformation();
-            trsfLRZ.SetRotation(gp_Ax1(localAnchor, gp_Dir(0.,0.,1.)),
-                                guiSettings->getPartRotationZ() * DEGREE_K);
-
-            gp_Trsf trsfGRX = curModel.Location().Transformation();;
-            trsfGRX.SetRotation(gp_Ax1(globalAnchor, gp_Dir(1.,0.,0.)),
-                                mdlMover.getRX() * DEGREE_K);
-            gp_Trsf trsfGRY = curModel.Location().Transformation();
-            trsfGRY.SetRotation(gp_Ax1(globalAnchor, gp_Dir(0.,1.,0.)),
-                                mdlMover.getRY() * DEGREE_K);
-            gp_Trsf trsfGRZ = curModel.Location().Transformation();
-            trsfGRZ.SetRotation(gp_Ax1(globalAnchor, gp_Dir(0.,0.,1.)),
-                                mdlMover.getRZ() * DEGREE_K);
-
-            gp_Trsf trsfSc = curModel.Location().Transformation();
-            double scaleFactor = guiSettings->getPartScale();
-            if (scaleFactor == 0.)
-                scaleFactor = 1.;
-            trsfSc.SetScale(localAnchor, scaleFactor);
-
-            context->SetLocation(ais_mdl,
-                                 trsfTr *
-                                 trsfGRX * trsfGRY * trsfGRZ *
-                                 trsfLRX * trsfLRY * trsfLRZ *
-                                 trsfSc);
+            context->SetLocation(ais_mdl, loc);
         }
 
         //The Grip
         if (guiSettings->isGripVisible() && !ais_grip.IsNull())
         {
-            gp_Trsf trsfTr = gripModel.Location().Transformation();
-            const gp_Vec translation(guiSettings->getGripTrX() + mdlMover.getTrX(),
-                                     guiSettings->getGripTrY() + mdlMover.getTrY(),
-                                     guiSettings->getGripTrZ() + mdlMover.getTrZ());
-            trsfTr.SetTranslation(translation);
-
-            const gp_Pnt localAnchor(guiSettings->getGripCenterX(),
-                                     guiSettings->getGripCenterY(),
-                                     guiSettings->getGripCenterZ());
-            gp_Trsf trsfLRX = gripModel.Location().Transformation();
-            trsfLRX.SetRotation(gp_Ax1(localAnchor, gp_Dir(1.,0.,0.)),
-                                guiSettings->getGripRotationX() * DEGREE_K);
-            gp_Trsf trsfLRY = gripModel.Location().Transformation();
-            trsfLRY.SetRotation(gp_Ax1(localAnchor, gp_Dir(0.,1.,0.)),
-                                guiSettings->getGripRotationY() * DEGREE_K);
-            gp_Trsf trsfLRZ = gripModel.Location().Transformation();
-            trsfLRZ.SetRotation(gp_Ax1(localAnchor, gp_Dir(0.,0.,1.)),
-                                guiSettings->getGripRotationZ() * DEGREE_K);
-
-            gp_Trsf trsfGRX = gripModel.Location().Transformation();
-            trsfGRX.SetRotation(gp_Ax1(globalAnchor, gp_Dir(1.,0.,0.)),
-                                mdlMover.getRX() * DEGREE_K);
-            gp_Trsf trsfGRY = gripModel.Location().Transformation();
-            trsfGRY.SetRotation(gp_Ax1(globalAnchor, gp_Dir(0.,1.,0.)),
-                                mdlMover.getRY() * DEGREE_K);
-            gp_Trsf trsfGRZ = gripModel.Location().Transformation();
-            trsfGRZ.SetRotation(gp_Ax1(globalAnchor, gp_Dir(0.,0.,1.)),
-                                mdlMover.getRZ() * DEGREE_K);
-
-            gp_Trsf trsfSc = gripModel.Location().Transformation();
-            double scaleFactor = guiSettings->getGripScale();
-            if (scaleFactor == 0.)
-                scaleFactor = 1.;
-            trsfSc.SetScale(localAnchor, scaleFactor);
-
+            gp_Trsf loc = calc_transform(gripModel.Location().Transformation(),
+                                         gp_Vec(guiSettings->getGripTrX() + mdlMover.getTrX(),
+                                                guiSettings->getGripTrY() + mdlMover.getTrY(),
+                                                guiSettings->getGripTrZ() + mdlMover.getTrZ()),
+                                         gp_Vec(guiSettings->getGripCenterX(),
+                                                guiSettings->getGripCenterY(),
+                                                guiSettings->getGripCenterZ()),
+                                         guiSettings->getGripScale(),
+                                         guiSettings->getGripRotationX(),
+                                         guiSettings->getGripRotationY(),
+                                         guiSettings->getGripRotationZ(),
+                                         mdlMover.getRX(),
+                                         mdlMover.getRY(),
+                                         mdlMover.getRZ());
             context->SetLocation(ais_grip,
-                                 trsfTr *
-                                 trsfGRX * trsfGRY * trsfGRZ *
-                                 trsfLRX * trsfLRY * trsfLRZ *
-                                 trsfSc);
+                                 loc);
         }
 
         //Draw The Laser
@@ -392,6 +378,7 @@ private:
 
     TopoDS_Shape curModel;
     Handle(AIS_Shape) ais_mdl;
+    bool draw_model = true;
     TopoDS_Shape gripModel;
     Handle(AIS_Shape) ais_grip;
     CBotCross cross;
@@ -449,7 +436,7 @@ void MainWindow::setSettings(CAbstractGuiSettings &settings)
 
     ui->wSettings->initFromGuiSettings(settings);
 
-    V3d_TypeOfOrientation orientation = V3d_XposYnegZpos;
+    V3d_TypeOfOrientation orientation = DEFAULT_ORIENTATION;
     if (d_ptr->guiSettings->getBotCoordType() == GUI_TYPES::ENCS_LEFT)
         orientation = V3d_XposYnegZneg;
     if (d_ptr->viewer->DefaultViewProj() != orientation) {
@@ -482,7 +469,9 @@ void MainWindow::updateMdlTransform()
             .arg(d_ptr->mdlMover.getRZ() , 11, 'f', 6, QChar('0'));
     ui->teJrnl->append(botTxt);
 
-    if (d_ptr->botSocket->isStarted() && d_ptr->botSocket->state() == BotSocket::ENSS_ATTACHED)
+    BotSocket::TSocketState sstate = d_ptr->botSocket->state();
+    d_ptr->draw_model = sstate != BotSocket::ENSS_NOT_ATTACHED;
+    if (d_ptr->botSocket->isStarted() && d_ptr->botSocket->state() != BotSocket::ENSS_FALL)
         d_ptr->reDrawScene();
 //    qDebug() << t.elapsed();
 }
@@ -600,7 +589,7 @@ void MainWindow::slCallibApply()
 {
     ui->wSettings->applyToGuiSettings(*d_ptr->guiSettings);
 
-    V3d_TypeOfOrientation orientation = V3d_XposYnegZpos;
+    V3d_TypeOfOrientation orientation = DEFAULT_ORIENTATION;
     if (d_ptr->guiSettings->getBotCoordType() == GUI_TYPES::ENCS_LEFT)
         orientation = V3d_XposYnegZneg;
     if (d_ptr->viewer->DefaultViewProj() != orientation) {

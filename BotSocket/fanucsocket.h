@@ -34,7 +34,9 @@ private:
 
     QTcpSocket socket_;
     position offset_ = {};
+    position scale_ = {1,1,1,1,1,1};
     bool attached_ = false;
+    bool bigendian_ = false;
 };
 
 #endif // FANUCSOCKET_H

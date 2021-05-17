@@ -15,5 +15,6 @@
     </qresource>
     <qresource prefix="/Models">
         <file>Data/Models/gripper_v1.step</file>
+        <file>Data/Models/turbine_blade.stp</file>
     </qresource>
 </RCC>
