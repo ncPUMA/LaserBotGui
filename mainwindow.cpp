@@ -265,9 +265,7 @@ private:
 
     void reDrawScene() {
         //The Part
-        if(!ais_mdl.IsNull() && draw_model)
-        {
-            gp_Trsf loc = calc_transform(curModel.Location().Transformation(),
+        gp_Trsf mdl_loc = calc_transform(curModel.Location().Transformation(),
                                          gp_Vec(guiSettings->getPartTrX() + mdlMover.getTrX(),
                                                 guiSettings->getPartTrY() + mdlMover.getTrY(),
                                                 guiSettings->getPartTrZ() + mdlMover.getTrZ()),
@@ -281,9 +279,8 @@ private:
                                          mdlMover.getRX(),
                                          mdlMover.getRY(),
                                          mdlMover.getRZ());
-
-            context->SetLocation(ais_mdl, loc);
-        }
+        if(!ais_mdl.IsNull() && draw_model)
+            context->SetLocation(ais_mdl, mdl_loc);
 
         //The Grip
         if (guiSettings->isGripVisible() && !ais_grip.IsNull())
@@ -302,8 +299,7 @@ private:
                                          mdlMover.getRX(),
                                          mdlMover.getRY(),
                                          mdlMover.getRZ());
-            context->SetLocation(ais_grip,
-                                 loc);
+            context->SetLocation(ais_grip, loc);
         }
 
         //Draw The Laser
@@ -332,7 +328,9 @@ private:
             gp_Vec aVec(aPnt1, aPnt2);
 
             IntCurvesFace_ShapeIntersector intersector;
-            intersector.Load(curModel, Precision::Confusion());
+            TopoDS_Shape mdl = curModel;
+            mdl.Location(mdl_loc);
+            intersector.Load(mdl, Precision::Confusion());
             const gp_Lin lin = gp_Lin(aPnt1, gp_Dir(aVec));
             intersector.PerformNearest(lin, 0, RealLast());
             if (intersector.IsDone() && intersector.NbPnt() > 0)
