@@ -38,8 +38,9 @@
 
 static constexpr double DEGREE_K = M_PI / 180.;
 
-static const Quantity_Color BG_CLR  = Quantity_Color(.7765,  .9, 1.  , Quantity_TOC_RGB);
-static const Quantity_Color TXT_CLR = Quantity_Color(  .15, .15, 0.15, Quantity_TOC_RGB);
+static const Quantity_Color BG_CLR   = Quantity_Color(.7765,  .9, 1.  , Quantity_TOC_RGB);
+static const Quantity_Color TXT_CLR  = Quantity_Color(  .15, .15, 0.15, Quantity_TOC_RGB);
+static const Quantity_Color FACE_CLR = Quantity_Color(0.1, 0.1, 0.1, Quantity_TOC_RGB);
 
 static constexpr int MAX_JRNL_ROW_COUNT = 15000;
 
@@ -85,7 +86,9 @@ private:
         viewer->SetLightOn();
 
         context = new AIS_InteractiveContext(viewer);
-        Handle(Prs3d_DatumAspect) datum = context->DefaultDrawer()->DatumAspect();
+
+        Handle(Prs3d_Drawer) drawer = context->DefaultDrawer();
+        Handle(Prs3d_DatumAspect) datum = drawer->DatumAspect();
 
 #if OCC_VERSION_HEX >= 0x070600
         datum->TextAspect(Prs3d_DatumParts_XAxis)->SetColor(TXT_CLR);
@@ -94,6 +97,11 @@ private:
 #else
         datum->TextAspect()->SetColor(TXT_CLR);
 #endif
+
+        Handle(Prs3d_LineAspect) lAspect = drawer->FaceBoundaryAspect();
+        lAspect->SetColor(FACE_CLR);
+        drawer->SetFaceBoundaryAspect(lAspect);
+        drawer->SetFaceBoundaryDraw(Standard_True);
 
         viewer->AddZLayer(zLayerId);
         Graphic3d_ZLayerSettings settings = viewer->ZLayerSettings(zLayerId);
@@ -198,6 +206,10 @@ private:
 
             ais_mdl = new AIS_Shape(curModel);
             context->SetDisplayMode(ais_mdl, shading ? 1 : 0, Standard_False);
+//            Handle(Prs3d_Drawer) drawer = context->DefaultDrawer();
+//            Handle(Prs3d_ShadingAspect) aShAspect = drawer->ShadingAspect();
+//            aShAspect->SetColor(Quantity_Color(Quantity_NOC_GREEN));
+//            drawer->SetShadingAspect(aShAspect);
             context->Display(ais_mdl, Standard_False);
             context->SetLocation(ais_mdl, loc);
         }
@@ -218,9 +230,19 @@ private:
 
             if (guiSettings->isGripVisible()) {
                 ais_grip = new AIS_Shape(gripModel);
+
+                Handle(Prs3d_Drawer) drawer = new Prs3d_Drawer();
+                Handle(Prs3d_ShadingAspect) aShAspect = drawer->ShadingAspect();
+                aShAspect->SetColor(Quantity_Color(Quantity_NOC_TOMATO3));
+                drawer->SetShadingAspect(aShAspect);
+                context->SetLocalAttributes(ais_grip, drawer, Standard_False);
+
+                Handle(Prs3d_LineAspect) lAspect = drawer->FaceBoundaryAspect();
+                lAspect->SetColor(FACE_CLR);
+                drawer->SetFaceBoundaryAspect(lAspect);
+                drawer->SetFaceBoundaryDraw(Standard_True);
+
                 context->SetDisplayMode(ais_grip, shading ? 1 : 0, Standard_False);
-                context->SetColor(ais_grip, Quantity_Color(Quantity_NOC_TOMATO3), Standard_False);
-                context->SetWidth(ais_grip, 30, Standard_False);
                 context->Display(ais_grip, Standard_False);
                 context->SetLocation(ais_grip, loc);
             }
