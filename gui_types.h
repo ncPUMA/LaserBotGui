@@ -13,6 +13,13 @@ enum EN_MSAA
 };
 typedef int TMSAA;
 
+enum EN_CoordSystems
+{
+    ENCS_RIGHT,
+    ENCS_LEFT
+};
+typedef int TCoordSystem;
+
 }
 
 #endif // GUI_TYPES_H
