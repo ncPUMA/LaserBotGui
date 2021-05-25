@@ -109,7 +109,7 @@ private:
         viewer->SetZLayerSettings(zLayerId, settings);
 
         //load gripModel
-        QFile gripFile(":/Models/Data/Models/gripper_v1.step");
+        QFile gripFile(":/Models/Data/Models/MHZ2_16D_grip.stp");
         if (gripFile.open(QIODevice::ReadOnly | QIODevice::Text))
         {
             const QByteArray stepData = gripFile.readAll();
