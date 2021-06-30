@@ -683,10 +683,10 @@ void MainWindow::configToolBar()
                                                 tr("Старт"),
                                                 this,
                                                 SLOT(slStart()));
-    d_ptr->startAction = ui->toolBar->addAction(QIcon(":/icons/Data/Icons/stop.png"),
-                                                tr("Стоп"),
-                                                this,
-                                                SLOT(slStop()));
+    d_ptr->stopAction = ui->toolBar->addAction(QIcon(":/icons/Data/Icons/stop.png"),
+                                               tr("Стоп"),
+                                               this,
+                                               SLOT(slStop()));
 
     //State and attach
     QFont fnt = font();
